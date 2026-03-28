@@ -10,21 +10,23 @@ import lombok.Getter;
 
 @Getter
 @MappedSuperclass
-public class BaseEntity{
+public class BaseEntity {
+	// @Column(name, { options } length, comment)
+
 	@Column(name = "created_at", nullable = false, updatable = false, comment = "생성 일시")
 	private LocalDateTime createdAt;
-    @Column(name = "updated_at", nullable = false, comment = "수정 일시")
+	@Column(name = "updated_at", nullable = false, comment = "수정 일시")
 	private LocalDateTime updatedAt;
 
 	@PrePersist
-	public void prePersist(){
+	public void prePersist() {
 		LocalDateTime now = LocalDateTime.now();
 		createdAt = now;
 		updatedAt = now;
 	}
 
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+	@PreUpdate
+	public void preUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
 }
