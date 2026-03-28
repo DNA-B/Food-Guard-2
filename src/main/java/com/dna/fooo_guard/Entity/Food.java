@@ -1,4 +1,4 @@
-package com.dna.fooo_guard.Entity;
+package com.dna.fooo_guard.entity;
 
 import java.time.LocalDate;
 
