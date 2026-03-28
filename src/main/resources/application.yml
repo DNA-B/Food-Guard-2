@@ -1,14 +1,18 @@
 spring:
+  application:
+    name: fooo-guard
+  output:
+    ansi:
+      enabled: always
   datasource:
-    url: jdbc:postgresql://localhost:${POSTGRES_PORT}/food-guard
+    url: ${DB_URL}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
-        format_sql: true
+        "[format_sql]": true
