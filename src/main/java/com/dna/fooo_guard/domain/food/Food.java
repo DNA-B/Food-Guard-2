@@ -1,7 +1,9 @@
-package com.dna.fooo_guard.entity;
+package com.dna.fooo_guard.domain.food;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+
+import com.dna.fooo_guard.domain.user.User;
+import com.dna.fooo_guard.global.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
