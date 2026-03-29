@@ -1,4 +1,7 @@
-package com.dna.fooo_guard.entity;
+package com.dna.fooo_guard.domain.user;
+
+import com.dna.fooo_guard.domain.group.Group;
+import com.dna.fooo_guard.global.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -12,12 +15,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE) // 빌더가 내부적으로 쓸 생성자
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA가 객체 생성할 때 쓸 생성자
 @Table(name = "users", comment = "사용자 정보 테이블")
 public class User extends BaseEntity {
 

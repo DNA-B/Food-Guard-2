@@ -1,4 +1,6 @@
-package com.dna.fooo_guard.entity;
+package com.dna.fooo_guard.domain.group;
+
+import com.dna.fooo_guard.global.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
