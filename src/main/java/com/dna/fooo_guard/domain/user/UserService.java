@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.dna.fooo_guard.domain.user.dto.UserSignUpRequest;
 import com.dna.fooo_guard.domain.user.dto.UserResponse;
+import com.dna.fooo_guard.domain.user.dto.UserSignUpRequest;
+import com.dna.fooo_guard.global.error.CustomException;
+import com.dna.fooo_guard.global.error.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,6 +17,10 @@ public class UserService {
     private final UserRepository userRepository;
 
     public String signUp(UserSignUpRequest request) {
+        if (userRepository.existsByNickname(request.getNickname())) {
+            throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
         User user = User.builder()
                 .username(request.getUsername())
                 .password(request.getPassword())
