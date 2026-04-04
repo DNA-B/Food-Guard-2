@@ -1,4 +1,4 @@
-package com.dna.fooo_guard.domain.user.dto;
+package com.dna.fooo_guard.domain.auth.dto;
 
 import com.dna.fooo_guard.domain.user.User;
 
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserSignUpRequest {
+public class SignUpRequest {
 
     private String username;
     private String password;
