@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
     private final UserRepository userRepository;
 
+    // TODO: request말고 dto로 바꿀지 고민
     public String signUp(UserSignUpRequest request) {
         if (userRepository.existsByNickname(request.getNickname())) {
             throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
