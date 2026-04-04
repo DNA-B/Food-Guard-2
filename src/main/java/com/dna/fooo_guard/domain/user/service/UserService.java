@@ -1,4 +1,4 @@
-package com.dna.fooo_guard.domain.user;
+package com.dna.fooo_guard.domain.user.service;
 
 import java.util.List;
 
@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dna.fooo_guard.domain.user.dto.UserResponse;
+import com.dna.fooo_guard.domain.user.entity.User;
+import com.dna.fooo_guard.domain.user.repository.UserRepository;
 import com.dna.fooo_guard.global.error.CustomException;
 import com.dna.fooo_guard.global.error.ErrorCode;
 
@@ -16,15 +18,15 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class UserService {
     private final UserRepository userRepository;
-    
-    @Transactional(readOnly=true)
+
+    @Transactional(readOnly = true)
     public UserResponse findUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         return UserResponse.from(user);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<UserResponse> findAllUsersByGroupId(Long groupId) {
         List<User> users = userRepository.findAllByGroupId(groupId);
 

@@ -2,7 +2,7 @@ package com.dna.fooo_guard.domain.food;
 
 import java.time.LocalDate;
 
-import com.dna.fooo_guard.domain.user.User;
+import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.global.BaseEntity;
 
 import jakarta.persistence.Column;

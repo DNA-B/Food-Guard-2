@@ -1,4 +1,4 @@
-package com.dna.fooo_guard.domain.user;
+package com.dna.fooo_guard.domain.user.entity;
 
 import com.dna.fooo_guard.domain.group.Group;
 import com.dna.fooo_guard.global.BaseEntity;

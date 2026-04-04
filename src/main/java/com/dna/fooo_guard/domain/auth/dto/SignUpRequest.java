@@ -1,6 +1,6 @@
 package com.dna.fooo_guard.domain.auth.dto;
 
-import com.dna.fooo_guard.domain.user.User;
+import com.dna.fooo_guard.domain.user.entity.User;
 
 import lombok.AccessLevel;
 import lombok.Getter;

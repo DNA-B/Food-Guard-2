@@ -33,12 +33,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Long userId = jwtTokenProvider.getUserIdFromToken(token);
 
                 // 인증 객체 생성 (권한은 일단 "USER"로 고정)
-                UsernamePasswordAuthenticationToken authentication = 
-                    new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId,
+                        null, Collections.emptyList());
 
                 // 시큐리티 세션(Context)에 인증 정보 저장
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                
+
             } catch (Exception e) {
                 // 일단 그냥 통과시켜서 다음 필터에서 걸러지게 두기.
             }

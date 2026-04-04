@@ -1,6 +1,6 @@
 package com.dna.fooo_guard.domain.user.dto;
 
-import com.dna.fooo_guard.domain.user.User;
+import com.dna.fooo_guard.domain.user.entity.User;
 
 import lombok.Builder;
 import lombok.Getter;

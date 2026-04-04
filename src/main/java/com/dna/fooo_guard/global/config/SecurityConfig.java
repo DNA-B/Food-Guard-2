@@ -36,7 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll() // 로그인 등은 통과
                         .anyRequest().authenticated() // 나머지는 일단 막기
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), 
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
