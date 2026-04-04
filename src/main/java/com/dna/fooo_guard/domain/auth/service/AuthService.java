@@ -4,7 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dna.fooo_guard.domain.auth.dto.AuthResponse;
+import com.dna.fooo_guard.domain.auth.dto.LoginResponse;
 import com.dna.fooo_guard.domain.auth.dto.LoginRequest;
 import com.dna.fooo_guard.domain.auth.dto.SignUpRequest;
 import com.dna.fooo_guard.domain.user.entity.User;
@@ -38,7 +38,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public AuthResponse login(LoginRequest dto) {
+    public LoginResponse login(LoginRequest dto) {
         User user = userRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -47,6 +47,8 @@ public class AuthService {
         }
 
         String token = jwtTokenProvider.createToken(user.getId());
-        return new AuthResponse(token);
+        return LoginResponse.builder()
+                .accessToken(token)
+                .build();
     }
 }

@@ -2,22 +2,21 @@ package com.dna.fooo_guard.domain.user.dto;
 
 import com.dna.fooo_guard.domain.user.entity.User;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserResponse {
 
-    private final Long id;
-    private final String username;
-    private final String nickname;
-
-    @Builder
-    public UserResponse(Long id, String username, String nickname) {
-        this.id = id;
-        this.username = username;
-        this.nickname = nickname;
-    }
+    private Long id;
+    private String username;
+    private String nickname;
 
     // Entity -> DTO
     public static UserResponse from(User user) {

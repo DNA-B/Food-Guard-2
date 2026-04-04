@@ -34,7 +34,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 X
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll() // 로그인 등은 통과
-                        .anyRequest().authenticated() // 나머지는 일단 막기
+                        .requestMatchers("/api/v1/auth/logout").authenticated() // 로그아웃은 인증 필요
+                        .anyRequest().authenticated() // 나머지는 인증 필요
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class);
