@@ -1,4 +1,4 @@
-package com.dna.fooo_guard.domain.food;
+package com.dna.fooo_guard.domain.food.entity;
 
 import java.time.LocalDate;
 
@@ -19,7 +19,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 enum FoodStatus {
     AVAILABLE,
@@ -28,8 +32,11 @@ enum FoodStatus {
 }
 
 @Entity
-@Table(name = "food", comment = "음식 정보 테이블")
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE) // 빌더가 내부적으로 쓸 생성자
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA용 생성자
+@Table(name = "food", comment = "음식 정보 테이블")
 public class Food extends BaseEntity {
 
     @Id
@@ -62,6 +69,10 @@ public class Food extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT), comment = "해당 음식의 소유자 ID (성능을 위해 물리 FK는 제거)")
     private User user;
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     @PrePersist
     public void initializeStatus() {
