@@ -2,6 +2,7 @@ package com.dna.fooo_guard.domain.food.entity;
 
 import java.time.LocalDate;
 
+import com.dna.fooo_guard.domain.food.dto.FoodEditRequest;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.global.BaseEntity;
 
@@ -72,6 +73,18 @@ public class Food extends BaseEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    // 값이 있으면 새 값, 없으면 기존 값 반환
+    private <T> T updateIfPresent(T current, T newValue) {
+        return newValue != null ? newValue : current;
+    }
+
+    public void edit(FoodEditRequest dto) {
+        this.name = updateIfPresent(this.name, dto.getName());
+        this.type = updateIfPresent(this.type, dto.getType());
+        this.description = updateIfPresent(this.description, dto.getDescription());
+        this.expiryAt = updateIfPresent(this.expiryAt, dto.getExpiryAt());
     }
 
     @PrePersist
