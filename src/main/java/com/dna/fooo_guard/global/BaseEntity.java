@@ -15,6 +15,7 @@ public class BaseEntity {
 
 	@Column(name = "created_at", nullable = false, updatable = false, comment = "생성 일시")
 	private LocalDateTime createdAt;
+
 	@Column(name = "updated_at", nullable = false, comment = "수정 일시")
 	private LocalDateTime updatedAt;
 
