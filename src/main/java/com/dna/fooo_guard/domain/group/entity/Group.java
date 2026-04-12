@@ -60,6 +60,5 @@ public class Group extends BaseEntity {
                 .build();
         this.members.add(userGroup);
         user.getGroups().add(userGroup);
-        System.out.println("addMember: " + user.getId() + " added to group " + this.id);
     }
 }
