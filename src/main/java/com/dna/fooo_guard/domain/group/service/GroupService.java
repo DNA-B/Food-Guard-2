@@ -3,6 +3,7 @@ package com.dna.fooo_guard.domain.group.service;
 import org.springframework.stereotype.Service;
 
 import com.dna.fooo_guard.domain.group.dto.GroupCreateRequest;
+import com.dna.fooo_guard.domain.group.dto.GroupResponse;
 import com.dna.fooo_guard.domain.group.entity.Group;
 import com.dna.fooo_guard.domain.group.repository.GroupRepository;
 import com.dna.fooo_guard.domain.user.entity.User;
@@ -24,7 +25,13 @@ public class GroupService {
         User manager = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Group group = groupRepository.save(dto.toEntity(manager));
-        group.addMember(manager); // dirty
+        group.addMember(manager); // dirty checking
+    }
+
+    public GroupResponse findGroupById(Long id) {
+        Group group = groupRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
+        return GroupResponse.from(group);
     }
 
 }
