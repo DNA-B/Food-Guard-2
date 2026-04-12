@@ -6,11 +6,15 @@ import com.dna.fooo_guard.domain.food.entity.Food;
 import com.dna.fooo_guard.domain.user.entity.User;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class FoodCreateRequest {
     String name;
     String type;
