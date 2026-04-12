@@ -2,6 +2,9 @@ package com.dna.fooo_guard.global.error;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.nio.file.attribute.UserDefinedFileAttributeView;
+
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -28,8 +31,14 @@ public enum ErrorCode {
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
+    // UserGroup Errors
+    USER_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 유저의 그룹을 찾을 수 없습니다."),
+
     // Food Errors
-    FOOD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 음식을 찾을 수 없습니다.");
+    FOOD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 음식을 찾을 수 없습니다."),
+
+    // Group Errors
+    GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 그룹을 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

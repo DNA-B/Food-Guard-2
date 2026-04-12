@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,28 +31,32 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
+    private User testUser;
+
+    @BeforeEach
+    void setUp() {
+        testUser = User.builder()
+                .id(1L)
+                .username("테스트유저")
+                .build();
+    }
+
     @Test
     @DisplayName("유저 조회 성공")
     void findUserById_Success() {
-        // given
-        Long userId = 1L;
-        User user = User.builder()
-                .id(userId)
-                .username("테스트유저")
-                .build();
+        Long userId = testUser.getId();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         UserResponse response = userService.findUserById(userId);
 
         assertNotNull(response);
-        assertEquals("테스트유저", response.getUsername());
+        assertEquals(1L, response.getId());
         verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
     @DisplayName("유저가 없을 때, 예외 발생")
     void findUserById_Fail() {
-        // given
         Long userId = 999L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 

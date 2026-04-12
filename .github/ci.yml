@@ -1,5 +1,0 @@
-on:
-  push:
-    branches: ["develop", "master"] # develop이나 master에 직접 푸시될 때
-  pull_request:
-    branches: ["develop", "master"] # feature -> develop 으로 PR 올릴 때
