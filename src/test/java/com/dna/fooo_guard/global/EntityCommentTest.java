@@ -12,6 +12,7 @@ import org.reflections.Reflections;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 
 class EntityCommentTest {
 
@@ -29,6 +30,12 @@ class EntityCommentTest {
 
         for (Class<?> entity : entities) {
             for (Field field : entity.getDeclaredFields()) {
+                OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+
+                if (oneToMany != null) {
+                    continue; // 양방향 연관관계에서 주 테이블이 아닌 경우는 comment 검증 제외
+                }
+
                 // 3. 어노테이션 정보 가져오기
                 Column column = field.getAnnotation(Column.class);
                 JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
