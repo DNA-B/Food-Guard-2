@@ -1,18 +1,17 @@
 package com.dna.fooo_guard.domain.user.entity;
 
-import com.dna.fooo_guard.domain.group.Group;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.dna.fooo_guard.domain.userGroup.entity.UserGroup;
 import com.dna.fooo_guard.global.BaseEntity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -42,7 +41,7 @@ public class User extends BaseEntity {
     @Column(name = "nickname", nullable = false, unique = true, length = 50, comment = "사용자 닉네임 (서비스 내에서 표시되는 이름)")
     private String nickname;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT), comment = "해당 사용자가 속한 그룹 ID (성능을 위해 물리 FK는 제거)")
-    private Group group;
+    @Builder.Default
+    @OneToMany(mappedBy = "user")
+    private List<UserGroup> groups = new ArrayList<>();
 }

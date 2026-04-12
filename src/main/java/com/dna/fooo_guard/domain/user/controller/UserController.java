@@ -1,5 +1,7 @@
 package com.dna.fooo_guard.domain.user.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dna.fooo_guard.domain.user.dto.UserResponse;
 import com.dna.fooo_guard.domain.user.service.UserService;
+import com.dna.fooo_guard.domain.userGroup.dto.UserGroupResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,14 +32,9 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    /*
-     * groupService에서 사용
-     * 
-     * @GetMapping("/")
-     * public void findAllUsersByGroupId() {
-     * Long groupId = 1L;
-     * userService.findAllUsersByGroupId(groupId);
-     * }
-     */
+    @GetMapping("/groups")
+    public ResponseEntity<List<UserGroupResponse>> findUserGroupsById(@AuthenticationPrincipal Long id) {
+        return ResponseEntity.ok(userService.findUserGroupsById(id));
+    }
 
 }
