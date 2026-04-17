@@ -3,9 +3,11 @@ package com.dna.fooo_guard.domain.group.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dna.fooo_guard.domain.group.dto.GroupEditRequest;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.domain.userGroup.entity.UserGroup;
 import com.dna.fooo_guard.global.BaseEntity;
+import com.dna.fooo_guard.global.util.CommonUtil;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -52,6 +54,11 @@ public class Group extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<UserGroup> members = new ArrayList<>();
+
+    public void edit(GroupEditRequest dto) {
+        this.name = CommonUtil.updateIfPresent(this.name, dto.getName());
+        this.description = CommonUtil.updateIfPresent(this.description, dto.getDescription());
+    }
 
     public void addMember(User user) {
         UserGroup userGroup = UserGroup.builder()

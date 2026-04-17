@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.dna.fooo_guard.domain.food.dto.FoodEditRequest;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.global.BaseEntity;
+import com.dna.fooo_guard.global.util.CommonUtil;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -71,20 +72,11 @@ public class Food extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT), comment = "해당 음식의 소유자 ID (성능을 위해 물리 FK는 제거)")
     private User user;
 
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    // 값이 있으면 새 값, 없으면 기존 값 반환
-    private <T> T updateIfPresent(T current, T newValue) {
-        return newValue != null ? newValue : current;
-    }
-
     public void edit(FoodEditRequest dto) {
-        this.name = updateIfPresent(this.name, dto.getName());
-        this.type = updateIfPresent(this.type, dto.getType());
-        this.description = updateIfPresent(this.description, dto.getDescription());
-        this.expiryAt = updateIfPresent(this.expiryAt, dto.getExpiryAt());
+        this.name = CommonUtil.updateIfPresent(this.name, dto.getName());
+        this.type = CommonUtil.updateIfPresent(this.type, dto.getType());
+        this.description = CommonUtil.updateIfPresent(this.description, dto.getDescription());
+        this.expiryAt = CommonUtil.updateIfPresent(this.expiryAt, dto.getExpiryAt());
     }
 
     @PrePersist
