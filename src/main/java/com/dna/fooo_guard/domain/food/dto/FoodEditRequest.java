@@ -17,4 +17,5 @@ public class FoodEditRequest {
       private String type;
       private String description;
       private LocalDate expiryAt;
+      private Long groupId;
 }

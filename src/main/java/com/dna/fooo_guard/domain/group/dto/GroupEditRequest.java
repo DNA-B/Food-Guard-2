@@ -1,8 +1,5 @@
 package com.dna.fooo_guard.domain.group.dto;
 
-import com.dna.fooo_guard.domain.group.entity.Group;
-import com.dna.fooo_guard.domain.user.entity.User;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

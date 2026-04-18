@@ -3,6 +3,7 @@ package com.dna.fooo_guard.domain.food.entity;
 import java.time.LocalDate;
 
 import com.dna.fooo_guard.domain.food.dto.FoodEditRequest;
+import com.dna.fooo_guard.domain.group.entity.Group;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.global.BaseEntity;
 import com.dna.fooo_guard.global.util.CommonUtil;
@@ -72,15 +73,22 @@ public class Food extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT), comment = "해당 음식의 소유자 ID (성능을 위해 물리 FK는 제거)")
     private User user;
 
-    public void edit(FoodEditRequest dto) {
-        this.name = CommonUtil.updateIfPresent(this.name, dto.getName());
-        this.type = CommonUtil.updateIfPresent(this.type, dto.getType());
-        this.description = CommonUtil.updateIfPresent(this.description, dto.getDescription());
-        this.expiryAt = CommonUtil.updateIfPresent(this.expiryAt, dto.getExpiryAt());
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id", nullable = true, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT), comment = "해당 음식이 소속된 그룹 ID (성능을 위해 물리 FK는 제거)")
+    private Group group;
 
     @PrePersist
     public void initializeStatus() {
         this.status = FoodStatus.AVAILABLE; // 기본 상태 설정
     }
+
+    // edit function start
+    public void edit(FoodEditRequest dto, Group group) {
+        this.name = CommonUtil.updateIfPresent(this.name, dto.getName());
+        this.type = CommonUtil.updateIfPresent(this.type, dto.getType());
+        this.description = CommonUtil.updateIfPresent(this.description, dto.getDescription());
+        this.expiryAt = CommonUtil.updateIfPresent(this.expiryAt, dto.getExpiryAt());
+        this.group = group;
+    }
+    // edit function end
 }

@@ -1,6 +1,10 @@
 spring:
   application:
     name: fooo-guard
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
   output:
     ansi:
       enabled: always
@@ -16,6 +20,7 @@ spring:
     properties:
       hibernate:
         "[format_sql]": true
+      
 jwt:
   secret: ${JWT_SECRET}
   expiration-time: ${JWT_EXPIRATION_TIME} # 1시간 (밀리초 단위)

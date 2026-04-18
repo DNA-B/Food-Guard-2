@@ -31,7 +31,7 @@ public class GroupController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
+    @GetMapping("/me")
     public ResponseEntity<List<GroupResponse>> getGroups(@AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok(groupService.findAllByUserId(userId));
     }

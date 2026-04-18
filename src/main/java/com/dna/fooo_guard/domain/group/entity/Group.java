@@ -55,6 +55,7 @@ public class Group extends BaseEntity {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<UserGroup> members = new ArrayList<>();
 
+    // edit function start
     public void edit(GroupEditRequest dto) {
         this.name = CommonUtil.updateIfPresent(this.name, dto.getName());
         this.description = CommonUtil.updateIfPresent(this.description, dto.getDescription());
@@ -68,4 +69,5 @@ public class Group extends BaseEntity {
         this.members.add(userGroup);
         user.getGroups().add(userGroup);
     }
+    // edit function start
 }

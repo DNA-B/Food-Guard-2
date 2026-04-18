@@ -3,7 +3,11 @@ package com.dna.fooo_guard.domain.group.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.dna.fooo_guard.domain.food.dto.FoodResponse;
+import com.dna.fooo_guard.domain.food.entity.Food;
+import com.dna.fooo_guard.domain.food.repository.FoodRepository;
 import com.dna.fooo_guard.domain.group.dto.GroupCreateRequest;
 import com.dna.fooo_guard.domain.group.dto.GroupEditRequest;
 import com.dna.fooo_guard.domain.group.dto.GroupResponse;
@@ -16,7 +20,6 @@ import com.dna.fooo_guard.domain.userGroup.repository.UserGroupRepository;
 import com.dna.fooo_guard.global.error.CustomException;
 import com.dna.fooo_guard.global.error.ErrorCode;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,6 +29,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
+    private final FoodRepository foodRepository;
 
     public void createGroup(GroupCreateRequest dto, Long userId) {
         User manager = userRepository.findById(userId)
@@ -34,21 +38,26 @@ public class GroupService {
         group.addMember(manager); // dirty checking
     }
 
+    @Transactional(readOnly = true)
     public GroupResponse findGroupById(Long id) {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
         return GroupResponse.from(group);
     }
 
+    @Transactional(readOnly = true)
     public List<GroupResponse> findAllByUserId(Long userId) {
         List<UserGroup> userGroups = userGroupRepository.findAllByUserId(userId);
-
-        if (userGroups.isEmpty()) {
-            throw new CustomException(ErrorCode.GROUP_NOT_FOUND);
-        }
-
         return userGroups.stream()
                 .map(userGroup -> GroupResponse.from(userGroup.getGroup()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<FoodResponse> findAllFoodById(Long id) {
+        List<Food> foods = foodRepository.findAllByGroupId(id);
+        return foods.stream()
+                .map(food -> FoodResponse.from(food))
                 .toList();
     }
 
