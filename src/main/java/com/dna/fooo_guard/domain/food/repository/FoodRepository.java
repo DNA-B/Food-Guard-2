@@ -1,5 +1,6 @@
 package com.dna.fooo_guard.domain.food.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,4 +11,6 @@ import com.dna.fooo_guard.domain.food.entity.Food;
 @Repository
 public interface FoodRepository extends JpaRepository<Food, Long> {
     Optional<Food> findByIdAndUserId(Long foodId, Long userId);
+
+    List<Food> findAllByGroupId(Long groupId);
 }

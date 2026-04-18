@@ -1,10 +1,9 @@
 package com.dna.fooo_guard.domain.food.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +22,8 @@ import com.dna.fooo_guard.domain.food.dto.FoodEditRequest;
 import com.dna.fooo_guard.domain.food.dto.FoodResponse;
 import com.dna.fooo_guard.domain.food.entity.Food;
 import com.dna.fooo_guard.domain.food.repository.FoodRepository;
+import com.dna.fooo_guard.domain.group.entity.Group;
+import com.dna.fooo_guard.domain.group.repository.GroupRepository;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.domain.user.repository.UserRepository;
 import com.dna.fooo_guard.global.error.CustomException;
@@ -34,6 +35,9 @@ public class FoodServiceTest {
     private UserRepository userRepository;
     @Mock
     private FoodRepository foodRepository;
+    @Mock
+    private GroupRepository groupRepository;
+
     @InjectMocks
     private FoodService foodService;
 
@@ -42,27 +46,37 @@ public class FoodServiceTest {
 
     @BeforeEach
     void setUp() {
-        testUser = User.builder()
-                .id(1L)
-                .username("테스트유저")
-                .build();
-
-        testFood = Food.builder()
-                .id(1L)
-                .name("기존음식")
-                .type("냉동")
-                .user(testUser)
-                .build();
+        testUser = User.builder().id(1L).username("테스트유저").build();
+        testFood = Food.builder().id(1L).name("기존음식").type("냉동").user(testUser).build();
     }
 
     @Test
-    @DisplayName("음식 생성 성공")
-    void testCreateFood() {
+    @DisplayName("성공 - 그룹 포함 음식 생성")
+    void testCreateFood_WithGroup() {
+        Long groupId = 10L;
         FoodCreateRequest dto = FoodCreateRequest.builder()
-                .name("새로운음식")
-                .type("냉장")
-                .description("맛있는 음식")
-                .expiryAt(null)
+                .name("그룹음식")
+                .type("김밥")
+                .groupId(groupId)
+                .build();
+        Group testGroup = Group.builder().id(groupId).name("공유냉장고").build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(groupRepository.findById(groupId)).thenReturn(Optional.of(testGroup));
+
+        foodService.createFood(dto, 1L);
+
+        verify(userRepository).findById(1L);
+        verify(groupRepository).findById(groupId);
+        verify(foodRepository).save(any(Food.class));
+    }
+
+    @Test
+    @DisplayName("성공 - 그룹 없이 음식 생성")
+    void testCreateFood_WithoutGroup() {
+        FoodCreateRequest dto = FoodCreateRequest.builder()
+                .name("단품음식")
+                .type("과일")
                 .build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
@@ -70,39 +84,92 @@ public class FoodServiceTest {
         foodService.createFood(dto, 1L);
 
         verify(userRepository).findById(1L);
+        verify(groupRepository, never()).findById(any());
         verify(foodRepository).save(any(Food.class));
     }
 
     @Test
-    @DisplayName("음식 수정 성공 - 엔티티 edit 메서드 호출 확인")
+    @DisplayName("실패 - 존재하지 않는 사용자 ID인 경우 USER_NOT_FOUND 발생")
+    void testCreateFood_UserNotFound() {
+        FoodCreateRequest dto = FoodCreateRequest.builder().name("음식").build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            foodService.createFood(dto, 1L);
+        });
+
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+        verify(foodRepository, never()).save(any(Food.class));
+    }
+
+    @Test
+    @DisplayName("성공 - ID와 사용자 ID로 음식 조회")
+    void testFindFoodByIdAndUserId_Success() {
+        when(foodRepository.findById(1L)).thenReturn(Optional.of(testFood));
+
+        FoodResponse response = foodService.findFoodByIdAndUserId(1L, 1L);
+
+        assertEquals(1L, response.getId());
+        assertEquals("기존음식", response.getName());
+        assertEquals("냉동", response.getType());
+    }
+
+    @Test
+    @DisplayName("성공 - 그룹 정보 변경을 포함한 음식 수정")
     void testEditFood() {
+        Long newGroupId = 20L;
+        Group newGroup = Group.builder().id(newGroupId).name("새그룹").build();
         FoodEditRequest editDto = FoodEditRequest.builder()
-                .name("수정된음식")
-                .type(null)
+                .name("수정음식")
+                .groupId(newGroupId)
                 .build();
 
         when(foodRepository.findById(1L)).thenReturn(Optional.of(testFood));
+        when(groupRepository.findById(newGroupId)).thenReturn(Optional.of(newGroup));
 
         foodService.editFood(1L, 1L, editDto);
 
-        assertEquals("수정된음식", testFood.getName());
-        assertEquals("냉동", testFood.getType()); // null로 보낸 필드는 기존 값 유지
-        verify(foodRepository).findById(1L);
+        assertEquals("수정음식", testFood.getName());
+        assertEquals(newGroupId, testFood.getGroup().getId());
     }
 
     @Test
-    @DisplayName("음식 삭제 성공")
-    void testDeleteFood() {
+    @DisplayName("실패 - 수정 시 존재하지 않는 그룹 ID인 경우 GROUP_NOT_FOUND 발생")
+    void testEditFood_GroupNotFound() {
+        Long invalidGroupId = 999L;
+        FoodEditRequest editDto = FoodEditRequest.builder().groupId(invalidGroupId).build();
+
         when(foodRepository.findById(1L)).thenReturn(Optional.of(testFood));
-        foodService.deleteFood(1L, 1L);
-        verify(foodRepository).delete(testFood);
+        when(groupRepository.findById(invalidGroupId)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            foodService.editFood(1L, 1L, editDto);
+        });
+
+        assertEquals(ErrorCode.GROUP_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
-    @DisplayName("권한 오류 - 내 음식이 아닌 경우 수정 실패")
+    @DisplayName("실패 - 음식을 찾을 수 없는 경우 FOOD_NOT_FOUND 발생")
+    void testEditFood_FoodNotFound() {
+        Long invalidFoodId = 888L;
+        FoodEditRequest editDto = FoodEditRequest.builder().name("수정").build();
+
+        when(foodRepository.findById(invalidFoodId)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            foodService.editFood(invalidFoodId, 1L, editDto);
+        });
+
+        assertEquals(ErrorCode.FOOD_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("실패 - 유저 권한이 없는 경우 ACCESS_DENIED 발생")
     void testEditFood_AccessDenied() {
         Long strangerId = 999L;
-        FoodEditRequest editDto = FoodEditRequest.builder().name("해킹시도").build();
+        FoodEditRequest editDto = FoodEditRequest.builder().name("해킹").build();
 
         when(foodRepository.findById(1L)).thenReturn(Optional.of(testFood));
 
@@ -114,19 +181,25 @@ public class FoodServiceTest {
     }
 
     @Test
-    @DisplayName("음식 조회(foodId, userId) 성공")
-    void testFindFoodByIdAndUserId() {
-        Long foodId = testFood.getId();
-        Long userId = testUser.getId();
+    @DisplayName("성공 - 음식 삭제")
+    void testDeleteFood() {
+        when(foodRepository.findById(1L)).thenReturn(Optional.of(testFood));
 
-        when(foodRepository.findById(foodId)).thenReturn(Optional.of(testFood));
+        foodService.deleteFood(1L, 1L);
 
-        FoodResponse response = foodService.findFoodByIdAndUserId(foodId, userId);
+        verify(foodRepository).delete(testFood);
+    }
 
-        assertNotNull(response);
-        assertEquals(foodId, response.getId());
-        assertEquals(testFood.getName(), response.getName());
+    @Test
+    @DisplayName("실패 - 삭제 시 권한이 없는 경우 ACCESS_DENIED 발생")
+    void testDeleteFood_AccessDenied() {
+        when(foodRepository.findById(1L)).thenReturn(Optional.of(testFood));
 
-        verify(foodRepository, times(1)).findById(foodId);
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            foodService.deleteFood(1L, 999L);
+        });
+
+        assertEquals(ErrorCode.ACCESS_DENIED, exception.getErrorCode());
+        verify(foodRepository, never()).delete(any(Food.class));
     }
 }
