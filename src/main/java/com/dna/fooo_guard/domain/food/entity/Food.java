@@ -78,11 +78,10 @@ public class Food extends BaseEntity {
     private Group group;
 
     @PrePersist
-    public void initializeStatus() {
+    public void prePersist() {
         this.status = FoodStatus.AVAILABLE; // 기본 상태 설정
     }
 
-    // edit function start
     public void edit(FoodEditRequest dto, Group group) {
         this.name = CommonUtil.updateIfPresent(this.name, dto.getName());
         this.type = CommonUtil.updateIfPresent(this.type, dto.getType());
@@ -90,5 +89,4 @@ public class Food extends BaseEntity {
         this.expiryAt = CommonUtil.updateIfPresent(this.expiryAt, dto.getExpiryAt());
         this.group = group;
     }
-    // edit function end
 }

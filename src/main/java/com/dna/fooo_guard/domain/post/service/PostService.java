@@ -25,7 +25,6 @@ public class PostService {
     private final UserRepository userRepository;
 
     // Helper Function start
-    @Transactional(readOnly = true)
     private Post getPostWithAccessCheck(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
@@ -45,6 +44,7 @@ public class PostService {
         postRepository.save(newPost);
     }
 
+    @Transactional(readOnly = true)
     public List<PostResponse> findAllPost() {
         List<Post> posts = postRepository.findAll();
         return posts.stream()
@@ -52,6 +52,7 @@ public class PostService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public PostResponse findPostByIdAndUserId(Long postId, Long userId) {
         Post post = getPostWithAccessCheck(postId, userId);
         return PostResponse.from(post);
