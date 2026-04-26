@@ -26,7 +26,6 @@ public class FoodService {
     private final GroupRepository groupRepository;
 
     // Helper Function start
-    @Transactional(readOnly = true)
     private Food getFoodWithAccessCheck(Long foodId, Long userId) {
         Food food = foodRepository.findById(foodId)
                 .orElseThrow(() -> new CustomException(ErrorCode.FOOD_NOT_FOUND));
@@ -58,6 +57,7 @@ public class FoodService {
         foodRepository.save(newFood);
     }
 
+    @Transactional(readOnly = true)
     public FoodResponse findFoodByIdAndUserId(Long foodId, Long userId) {
         Food food = getFoodWithAccessCheck(foodId, userId);
         return FoodResponse.from(food);

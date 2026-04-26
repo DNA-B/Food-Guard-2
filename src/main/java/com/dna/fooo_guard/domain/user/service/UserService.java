@@ -24,7 +24,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
 
-    @Transactional(readOnly = true)
     public UserResponse findUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -39,6 +38,7 @@ public class UserService {
     }
 
     // TODO: N+1 문제
+    @Transactional(readOnly = true)
     public List<UserGroupResponse> findUserGroupsById(Long userId) {
         List<UserGroup> userGroups = userGroupRepository.findAllByUserId(userId);
 
