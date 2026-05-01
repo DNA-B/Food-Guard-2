@@ -44,7 +44,9 @@ public enum ErrorCode {
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다"),
 
     // Comment Errors
-    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 댓글을 찾을 수 없습니다.");
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 댓글을 찾을 수 없습니다."),
+    INVALID_PARENT_COMMENT(HttpStatus.BAD_REQUEST, "유효하지 않은 부모 댓글입니다."),
+    ALREADY_DELETED_COMMENT(HttpStatus.BAD_REQUEST, "이미 삭제된 부모 댓글입니다.");
 
     private final HttpStatus status;
     private final String message;
