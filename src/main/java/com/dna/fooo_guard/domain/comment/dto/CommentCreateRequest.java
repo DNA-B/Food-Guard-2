@@ -15,13 +15,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentCreateRequest {
     String content;
+    Long parentId;
 
-    public Comment toEntity(User user, Long postId, Long parentId) {
+    public Comment toEntity(User user, Long postId) {
         return Comment.builder()
                 .content(this.content)
                 .user(user)
                 .postId(postId)
-                .parentId(parentId)
+                .parentId(this.parentId)
                 .build();
     }
 }

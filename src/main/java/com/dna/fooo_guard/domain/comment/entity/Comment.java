@@ -25,12 +25,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-enum CommentStatus {
-    PUBLISHED,
-    EDITED,
-    DELETED,
-}
-
 @Entity
 @Getter
 @Builder
