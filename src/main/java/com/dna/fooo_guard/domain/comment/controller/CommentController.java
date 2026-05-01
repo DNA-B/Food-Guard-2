@@ -27,27 +27,28 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/posts/{postId}/comments")
-    public ResponseEntity<Void> createComment(@RequestBody CommentCreateRequest dto, @PathVariable Long postId,
+    public ResponseEntity<Void> createComment(@RequestBody CommentCreateRequest dto,
+            @PathVariable("postId") Long postId,
             @AuthenticationPrincipal Long userId) {
         commentService.createComment(dto, postId, userId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable Long postId) {
+    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable("postId") Long postId) {
         List<CommentResponse> comments = commentService.findAllCommentByPostId(postId);
         return ResponseEntity.ok(comments);
     }
 
     @PutMapping("/comments/{id}")
-    public ResponseEntity<Void> editComment(@RequestBody CommentEditRequest dto, @PathVariable Long id,
+    public ResponseEntity<Void> editComment(@RequestBody CommentEditRequest dto, @PathVariable("id") Long id,
             @AuthenticationPrincipal Long userId) {
         commentService.editComment(dto, id, userId);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/comments/{id}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long id, @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<Void> deleteComment(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId) {
         commentService.deleteComment(id, userId);
         return ResponseEntity.ok().build();
     }

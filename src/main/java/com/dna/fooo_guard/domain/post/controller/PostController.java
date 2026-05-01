@@ -38,19 +38,19 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPost(@PathVariable Long id, @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<PostResponse> getPost(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok(postService.findPostByIdAndUserId(id, userId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> editPost(@PathVariable Long id, @AuthenticationPrincipal Long userId,
+    public ResponseEntity<Void> editPost(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId,
             @RequestBody PostEditRequest dto) {
         postService.editPost(id, userId, dto);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id, @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<Void> deletePost(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId) {
         postService.deletePost(id, userId);
         return ResponseEntity.ok().build();
     }

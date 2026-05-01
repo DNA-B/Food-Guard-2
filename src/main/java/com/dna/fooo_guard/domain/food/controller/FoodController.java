@@ -31,19 +31,19 @@ public class FoodController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FoodResponse> getFood(@PathVariable Long id, @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<FoodResponse> getFood(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok(foodService.findFoodByIdAndUserId(id, userId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> editFood(@PathVariable Long id, @AuthenticationPrincipal Long userId,
+    public ResponseEntity<Void> editFood(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId,
             @RequestBody FoodEditRequest dto) {
         foodService.editFood(id, userId, dto);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFood(@PathVariable Long id, @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<Void> deleteFood(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId) {
         foodService.deleteFood(id, userId);
         return ResponseEntity.ok().build();
     }

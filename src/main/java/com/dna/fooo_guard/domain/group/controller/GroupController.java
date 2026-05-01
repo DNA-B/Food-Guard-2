@@ -37,12 +37,12 @@ public class GroupController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GroupResponse> getGroup(@PathVariable Long id) {
+    public ResponseEntity<GroupResponse> getGroup(@PathVariable("id") Long id) {
         return ResponseEntity.ok(groupService.findGroupById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> editGroup(@PathVariable Long id, @RequestBody GroupEditRequest dto) {
+    public ResponseEntity<Void> editGroup(@PathVariable("id") Long id, @RequestBody GroupEditRequest dto) {
         groupService.editGroup(id, dto);
         return ResponseEntity.ok().build();
     }
