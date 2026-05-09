@@ -44,24 +44,27 @@ public class CommentService {
     public void createComment(CommentCreateRequest dto, Long postId, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Long parentId = dto.getParentId();
 
-        // dto.getParentId()를 사용하여 검증
         if (dto.getParentId() != null) {
             Comment parent = commentRepository.findById(dto.getParentId())
                     .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 
-            // 게시글 일치 확인
             if (!parent.getPostId().equals(postId)) {
                 throw new CustomException(ErrorCode.INVALID_PARENT_COMMENT);
             }
 
-            // 부모 삭제 여부 확인
             if (parent.getStatus() == CommentStatus.DELETED) {
                 throw new CustomException(ErrorCode.ALREADY_DELETED_COMMENT);
             }
+
+            // 만약 대댓글을 달려는 대상이 이미 parentId를 갖고 있다면 그것으로 교체
+            if (parent.getParentId() != null) {
+                parentId = parent.getParentId();
+            }
         }
 
-        Comment newComment = dto.toEntity(user, postId);
+        Comment newComment = dto.toEntity(user, postId, parentId);
         commentRepository.save(newComment);
     }
 
@@ -70,26 +73,29 @@ public class CommentService {
     public List<CommentResponse> findAllCommentByPostId(Long postId) {
         List<Comment> comments = commentRepository.findAllByPostId(postId);
 
-        Map<Long, CommentResponse> map = new HashMap<>();
-        List<CommentResponse> rootResponses = new ArrayList<>();
+        Map<Long, CommentResponse> rootMap = new HashMap<>();
+        List<CommentResponse> roots = new ArrayList<>();
 
+        // 최상위 부모들만 먼저 골라내서 Map에 저장
         for (Comment comment : comments) {
-            CommentResponse dto = CommentResponse.from(comment);
-            map.put(dto.getId(), dto);
-
             if (comment.getParentId() == null) {
-                // 최상위 댓글인 경우
-                rootResponses.add(dto);
-            } else {
-                // 자식 댓글인 경우
-                CommentResponse parentDto = map.get(comment.getParentId());
+                CommentResponse dto = CommentResponse.from(comment);
+                rootMap.put(dto.getId(), dto);
+                roots.add(dto);
+            }
+        }
+
+        // 나머지 자식들 parentId 보고 rootMap에서 부모 찾아서 리스트에 추가
+        for (Comment comment : comments) {
+            if (comment.getParentId() != null) {
+                CommentResponse parentDto = rootMap.get(comment.getParentId());
                 if (parentDto != null) {
-                    parentDto.getChildren().add(dto);
+                    parentDto.getChildren().add(CommentResponse.from(comment));
                 }
             }
         }
 
-        return rootResponses;
+        return roots;
     }
 
     @Transactional(readOnly = true)
