@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
@@ -30,15 +30,7 @@ public class UserService {
         return UserResponse.from(user);
     }
 
-    public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
-        }
-        userRepository.deleteById(id);
-    }
-
     // TODO: N+1 문제
-    @Transactional(readOnly = true)
     public List<UserGroupResponse> findUserGroupsById(Long userId) {
         List<UserGroup> userGroups = userGroupRepository.findAllByUserId(userId);
 
@@ -49,5 +41,13 @@ public class UserService {
         return userGroups.stream()
                 .map(userGroup -> UserGroupResponse.from(userGroup.getGroup()))
                 .toList();
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+        userRepository.deleteById(id);
     }
 }

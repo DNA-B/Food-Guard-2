@@ -56,7 +56,7 @@ public class Comment extends BaseEntity {
     private User user;
 
     @PrePersist
-    public void prePersist() {
+    private void prePersist() {
         status = CommentStatus.PUBLISHED;
     }
 

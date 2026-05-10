@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
@@ -41,6 +41,7 @@ public class CommentService {
     }
     // Helper Function end
 
+    @Transactional
     public void createComment(CommentCreateRequest dto, Long postId, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -69,7 +70,6 @@ public class CommentService {
     }
 
     // TODO: User 정보 가져올 때, N+1 문제
-    @Transactional(readOnly = true)
     public List<CommentResponse> findAllCommentByPostId(Long postId) {
         List<Comment> comments = commentRepository.findAllByPostId(postId);
 
@@ -98,19 +98,20 @@ public class CommentService {
         return roots;
     }
 
-    @Transactional(readOnly = true)
     public CommentResponse findCommentByIdAndUserId(Long commentId, Long userId) {
         Comment comment = getCommentWithAccessCheck(commentId, userId);
         return CommentResponse.from(comment);
     }
 
     // dirtyCheking으로 DB 자동 반영하기
+    @Transactional
     public void editComment(CommentEditRequest dto, Long commentId, Long userId) {
         Comment comment = getCommentWithAccessCheck(commentId, userId);
         comment.edit(dto);
     }
 
     // dirtyCheking으로 DB 자동 반영하기
+    @Transactional
     public void deleteComment(Long commentId, Long userId) {
         Comment comment = getCommentWithAccessCheck(commentId, userId);
         comment.delete();

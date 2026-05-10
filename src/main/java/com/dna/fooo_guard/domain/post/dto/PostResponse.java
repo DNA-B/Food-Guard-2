@@ -1,5 +1,7 @@
 package com.dna.fooo_guard.domain.post.dto;
 
+import java.time.LocalDateTime;
+
 import com.dna.fooo_guard.domain.post.entity.Post;
 
 import lombok.AccessLevel;
@@ -16,6 +18,8 @@ public class PostResponse {
     private Long id;
     private String title;
     private String content;
+    private String author;
+    private LocalDateTime createdAt;
     // TODO: 이미지 URL 추가
 
     // Entity -> DTO
@@ -24,6 +28,8 @@ public class PostResponse {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .author(post.getUser().getNickname())
+                .createdAt(post.getCreatedAt())
                 .build();
     }
 }

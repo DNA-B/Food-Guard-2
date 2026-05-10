@@ -8,6 +8,8 @@ import com.dna.fooo_guard.global.util.CommonUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -49,15 +51,24 @@ public class Post extends BaseEntity {
     @Column(name = "image_filename", length = 255, comment = "이미지 파일명")
     private String imageFilename;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "post_type", nullable = false, comment = "게시물 유형 (FREE: 자유 게시물, DONATION: 기부 게시물)")
+    private PostType postType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT), comment = "해당 게시물의 작성자 ID (성능을 위해 물리 FK는 제거)")
     private User user;
 
-    // edit function start
+    @PrePersist
+    public void prePersist() {
+        if (this.postType == null) {
+            this.postType = PostType.FREE;
+        }
+    }
+
     public void edit(PostEditRequest dto) {
         this.title = CommonUtil.updateIfPresent(this.title, dto.getTitle());
         this.content = CommonUtil.updateIfPresent(this.content, dto.getContent());
         // TODO: 이미지 수정
     }
-    // edit function end
 }
