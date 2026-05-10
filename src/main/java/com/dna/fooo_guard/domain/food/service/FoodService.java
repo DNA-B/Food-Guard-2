@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class FoodService {
     private final FoodRepository foodRepository;
     private final UserRepository userRepository;
@@ -37,7 +37,6 @@ public class FoodService {
         return food;
     }
 
-    @Transactional(readOnly = true)
     private Group findGroupOrNull(Long groupId) {
         if (groupId == null) {
             return null;
@@ -48,6 +47,7 @@ public class FoodService {
     }
     // Helper Function end
 
+    @Transactional
     public void createFood(FoodCreateRequest dto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -57,19 +57,20 @@ public class FoodService {
         foodRepository.save(newFood);
     }
 
-    @Transactional(readOnly = true)
     public FoodResponse findFoodByIdAndUserId(Long foodId, Long userId) {
         Food food = getFoodWithAccessCheck(foodId, userId);
         return FoodResponse.from(food);
     }
 
     // dirtyCheking으로 DB 자동 반영하기
+    @Transactional
     public void editFood(Long foodId, Long userId, FoodEditRequest dto) {
         Food food = getFoodWithAccessCheck(foodId, userId);
         Group group = findGroupOrNull(dto.getGroupId());
         food.edit(dto, group); // group이 null이면 그대로 null로 수정
     }
 
+    @Transactional
     public void deleteFood(Long foodId, Long userId) {
         Food food = getFoodWithAccessCheck(foodId, userId);
         foodRepository.delete(food);

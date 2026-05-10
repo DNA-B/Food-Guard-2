@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -37,6 +37,7 @@ public class PostService {
     }
     // Helper Function end
 
+    @Transactional
     public void createPost(PostCreateRequest dto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -44,7 +45,6 @@ public class PostService {
         postRepository.save(newPost);
     }
 
-    @Transactional(readOnly = true)
     public List<PostResponse> findAllPost() {
         List<Post> posts = postRepository.findAll();
         return posts.stream()
@@ -52,18 +52,19 @@ public class PostService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public PostResponse findPostByIdAndUserId(Long postId, Long userId) {
         Post post = getPostWithAccessCheck(postId, userId);
         return PostResponse.from(post);
     }
 
     // dirtyCheking으로 DB 자동 반영하기
+    @Transactional
     public void editPost(Long postId, Long userId, PostEditRequest dto) {
         Post post = getPostWithAccessCheck(postId, userId);
         post.edit(dto);
     }
 
+    @Transactional
     public void deletePost(Long postId, Long userId) {
         Post post = getPostWithAccessCheck(postId, userId);
         postRepository.delete(post);

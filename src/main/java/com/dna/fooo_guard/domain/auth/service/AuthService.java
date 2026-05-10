@@ -17,12 +17,13 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Transactional
     public String signUp(SignUpRequest dto) {
         if (userRepository.existsByUsername(dto.getUsername())) {
             throw new CustomException(ErrorCode.DUPLICATE_USERNAME);
@@ -37,7 +38,6 @@ public class AuthService {
         return String.format("유저[%s] - 회원가입", user.getUsername());
     }
 
-    @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest dto) {
         User user = userRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));

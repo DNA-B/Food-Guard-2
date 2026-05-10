@@ -24,13 +24,14 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class GroupService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
     private final FoodRepository foodRepository;
 
+    @Transactional
     public void createGroup(GroupCreateRequest dto, Long userId) {
         User manager = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -38,14 +39,12 @@ public class GroupService {
         group.addMember(manager); // dirty checking
     }
 
-    @Transactional(readOnly = true)
     public GroupResponse findGroupById(Long id) {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
         return GroupResponse.from(group);
     }
 
-    @Transactional(readOnly = true)
     public List<GroupResponse> findAllByUserId(Long userId) {
         List<UserGroup> userGroups = userGroupRepository.findAllByUserId(userId);
         return userGroups.stream()
@@ -53,7 +52,6 @@ public class GroupService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<FoodResponse> findAllFoodById(Long id) {
         List<Food> foods = foodRepository.findAllByGroupId(id);
         return foods.stream()
@@ -62,10 +60,12 @@ public class GroupService {
     }
 
     // dirtyCheking으로 DB 자동 반영하기
+    @Transactional
     public void editGroup(Long groupId, GroupEditRequest dto) {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
         group.edit(dto);
     }
 
+    // TODO: 그룹 삭제
 }

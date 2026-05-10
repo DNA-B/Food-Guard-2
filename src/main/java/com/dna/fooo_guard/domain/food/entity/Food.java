@@ -28,12 +28,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-enum FoodStatus {
-    AVAILABLE,
-    CONSUMED,
-    DONATED,
-}
-
 @Entity
 @Getter
 @Builder
@@ -78,8 +72,12 @@ public class Food extends BaseEntity {
     private Group group;
 
     @PrePersist
-    public void prePersist() {
+    private void prePersist() {
         this.status = FoodStatus.AVAILABLE; // 기본 상태 설정
+    }
+
+    public void updateStatus(FoodStatus newStatus) {
+        this.status = newStatus;
     }
 
     public void edit(FoodEditRequest dto, Group group) {
