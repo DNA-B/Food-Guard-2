@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dna.fooo_guard.domain.comment.entity.Comment;
+import com.dna.fooo_guard.domain.comment.repository.CommentRepository;
 import com.dna.fooo_guard.domain.donation.dto.DonationCreateRequest;
 import com.dna.fooo_guard.domain.donation.dto.DonationEditRequest;
 import com.dna.fooo_guard.domain.donation.dto.DonationResponse;
@@ -32,6 +34,7 @@ public class DonationService {
     private final PostRepository postRepository;
     private final FoodRepository foodRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
     private Donation getDonationWithAccessCheck(Long donationId, Long userId) {
         Donation donation = donationRepository.findById(donationId)
@@ -48,6 +51,11 @@ public class DonationService {
     public void createDonation(DonationCreateRequest dto, Long userId) {
         Food food = foodRepository.findById(dto.getFoodId())
                 .orElseThrow(() -> new CustomException(ErrorCode.FOOD_NOT_FOUND));
+
+        if (food.getStatus() != FoodStatus.AVAILABLE) {
+            throw new CustomException(ErrorCode.FOOD_NOT_AVAILABLE);
+        }
+
         food.updateStatus(FoodStatus.DONATED);
 
         Post post = Post.builder()
@@ -67,34 +75,56 @@ public class DonationService {
     }
 
     public List<DonationResponse> findAllDonations() {
+        // TODO: N+1
         return donationRepository.findAll().stream()
                 .map(DonationResponse::from)
                 .toList();
     }
 
-    public DonationResponse findDonationById(Long donationId, Long userId) {
-        Donation donation = getDonationWithAccessCheck(donationId, userId);
+    public DonationResponse findDonationById(Long donationId) {
+        Donation donation = donationRepository.findById(donationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         return DonationResponse.from(donation);
     }
 
-    // TODO: 수정 검토
     @Transactional
     public void editDonation(Long donationId, Long userId, DonationEditRequest dto) {
         Donation donation = getDonationWithAccessCheck(donationId, userId);
-        donation.getPost()
-                .edit(PostEditRequest.builder()
+
+        donation.getPost().edit(
+                PostEditRequest.builder()
                         .title(dto.getTitle())
                         .content(dto.getContent())
                         .build());
 
-        Food newFood = foodRepository.getReferenceById(dto.getFoodId());
-        donation.edit(newFood);
+        if (dto.getFoodId() != null && !donation.getFood().getId().equals(dto.getFoodId())) {
+            Food newFood = foodRepository.findById(dto.getFoodId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.FOOD_NOT_FOUND));
+
+            if (newFood.getStatus() != FoodStatus.AVAILABLE) {
+                throw new CustomException(ErrorCode.FOOD_NOT_AVAILABLE);
+            }
+
+            donation.getFood().updateStatus(FoodStatus.AVAILABLE);
+            newFood.updateStatus(FoodStatus.DONATED);
+            donation.edit(newFood);
+        }
     }
 
     @Transactional
     public void deleteDonation(Long donationId, Long userId) {
         Donation donation = getDonationWithAccessCheck(donationId, userId);
+        Post post = donation.getPost();
+
+        // 연관된 음식 상태 복원
+        donation.getFood().updateStatus(FoodStatus.AVAILABLE);
+
+        List<Comment> comments = commentRepository.findAllByPostId(post.getId());
+        for (Comment comment : comments) {
+            comment.delete();
+        }
+
         donationRepository.delete(donation);
-        postRepository.delete(donation.getPost());
+        postRepository.delete(post);
     }
 }

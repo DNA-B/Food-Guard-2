@@ -85,6 +85,11 @@ public class Food extends BaseEntity {
         this.type = CommonUtil.updateIfPresent(this.type, dto.getType());
         this.description = CommonUtil.updateIfPresent(this.description, dto.getDescription());
         this.expiryAt = CommonUtil.updateIfPresent(this.expiryAt, dto.getExpiryAt());
-        this.group = group;
+        this.group = CommonUtil.updateIfPresent(this.group, group);
+    }
+
+    // groupId -1일 때, 그룹 null로 설정
+    public void clearGroup() {
+        this.group = null;
     }
 }

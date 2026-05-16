@@ -7,6 +7,7 @@ import com.dna.fooo_guard.domain.food.dto.FoodCreateRequest;
 import com.dna.fooo_guard.domain.food.dto.FoodEditRequest;
 import com.dna.fooo_guard.domain.food.dto.FoodResponse;
 import com.dna.fooo_guard.domain.food.entity.Food;
+import com.dna.fooo_guard.domain.food.entity.FoodStatus;
 import com.dna.fooo_guard.domain.food.repository.FoodRepository;
 import com.dna.fooo_guard.domain.group.entity.Group;
 import com.dna.fooo_guard.domain.group.repository.GroupRepository;
@@ -25,7 +26,7 @@ public class FoodService {
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
 
-    // Helper Function start
+    // [권한 및 존재 검증 헬퍼]
     private Food getFoodWithAccessCheck(Long foodId, Long userId) {
         Food food = foodRepository.findById(foodId)
                 .orElseThrow(() -> new CustomException(ErrorCode.FOOD_NOT_FOUND));
@@ -37,23 +38,12 @@ public class FoodService {
         return food;
     }
 
-    private Group findGroupOrNull(Long groupId) {
-        if (groupId == null) {
-            return null;
-        }
-
-        return groupRepository.findById(groupId)
-                .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
-    }
-    // Helper Function end
-
     @Transactional
     public void createFood(FoodCreateRequest dto, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Group group = findGroupOrNull(dto.getGroupId());
-        Food newFood = dto.toEntity(user, group);
+        User user = userRepository.getReferenceById(userId);
+        Group group = groupRepository.getReferenceById(dto.getGroupId());
 
+        Food newFood = dto.toEntity(user, group);
         foodRepository.save(newFood);
     }
 
@@ -62,17 +52,28 @@ public class FoodService {
         return FoodResponse.from(food);
     }
 
-    // dirtyCheking으로 DB 자동 반영하기
     @Transactional
     public void editFood(Long foodId, Long userId, FoodEditRequest dto) {
         Food food = getFoodWithAccessCheck(foodId, userId);
-        Group group = findGroupOrNull(dto.getGroupId());
-        food.edit(dto, group); // group이 null이면 그대로 null로 수정
+        Group targetGroup = groupRepository.getReferenceById(dto.getGroupId());
+
+        // -1이나 null이어도 edit에서는 CommonUtil 덕분에 문제 없음.
+        food.edit(dto, targetGroup);
+
+        // 실제로 -1일 때는 group 해제
+        if (dto.getGroupId() != null && dto.getGroupId() == -1) {
+            food.clearGroup();
+        }
     }
 
     @Transactional
     public void deleteFood(Long foodId, Long userId) {
         Food food = getFoodWithAccessCheck(foodId, userId);
+
+        if (food.getStatus() == FoodStatus.DONATED) {
+            throw new CustomException(ErrorCode.CANNOT_DELETE_DONATED_FOOD);
+        }
+
         foodRepository.delete(food);
     }
 }

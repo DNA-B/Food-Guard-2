@@ -13,4 +13,8 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
     Optional<Food> findByIdAndUserId(Long foodId, Long userId);
 
     List<Food> findAllByGroupId(Long groupId);
+
+    List<Food> findAllByUserIdAndGroupId(Long userId, Long groupId);
+
+    Void deleteAllByUserId(Long userId);
 }

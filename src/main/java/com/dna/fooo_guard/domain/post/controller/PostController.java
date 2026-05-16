@@ -38,8 +38,8 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPost(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(postService.findPostByIdAndUserId(id, userId));
+    public ResponseEntity<PostResponse> getPost(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(postService.findPostById(id));
     }
 
     @PutMapping("/{id}")

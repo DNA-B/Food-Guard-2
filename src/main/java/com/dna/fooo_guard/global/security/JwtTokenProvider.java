@@ -8,10 +8,17 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.dna.fooo_guard.global.error.CustomException;
+import com.dna.fooo_guard.global.error.ErrorCode;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
@@ -51,5 +58,18 @@ public class JwtTokenProvider {
                 .getPayload()
                 .getSubject();
         return Long.parseLong(subject);
+    }
+
+    public void validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(signedKey)
+                    .build()
+                    .parseSignedClaims(token);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(ErrorCode.EXPIRED_TOKEN);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
     }
 }

@@ -13,6 +13,9 @@ public enum ErrorCode {
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "올바르지 않은 입력값입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 에러가 발생했습니다."),
 
+    // Authentication Errors
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
+
     // JWT Errors
     NOT_FOUND_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
@@ -34,9 +37,14 @@ public enum ErrorCode {
 
     // Food Errors
     FOOD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 음식을 찾을 수 없습니다."),
+    FOOD_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "해당 음식은 사용할 수 없습니다."),
+    CANNOT_DELETE_DONATED_FOOD(HttpStatus.BAD_REQUEST, "나눔 중인 음식은 삭제할 수 없습니다."),
 
     // Group Errors
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 그룹을 찾을 수 없습니다."),
+    NO_REMAINING_MEMBER(HttpStatus.BAD_REQUEST, "남은 멤버가 없어 그룹을 유지할 수 없습니다."),
+    NOT_A_GROUP_MEMBER(HttpStatus.BAD_REQUEST, "그룹의 멤버가 아닙니다."),
+    INVALID_MANAGER_ASSIGNMENT(HttpStatus.BAD_REQUEST, "유효하지 않은 방장 위임입니다."),
 
     // Post Errors
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다"),

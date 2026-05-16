@@ -31,12 +31,25 @@ public class GroupService {
     private final UserGroupRepository userGroupRepository;
     private final FoodRepository foodRepository;
 
+    // Helper Functions
+    private Group getGroupWithManagerCheck(Long groupId, Long userId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
+
+        if (!group.getManager().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        return group;
+    }
+    // Helper end
+
     @Transactional
     public void createGroup(GroupCreateRequest dto, Long userId) {
-        User manager = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Group group = groupRepository.save(dto.toEntity(manager));
-        group.addMember(manager); // dirty checking
+        User manager = userRepository.getReferenceById(userId);
+        Group group = dto.toEntity(manager);
+        group.addMember(manager);
+        groupRepository.save(group);
     }
 
     public GroupResponse findGroupById(Long id) {
@@ -45,6 +58,7 @@ public class GroupService {
         return GroupResponse.from(group);
     }
 
+    // TODO: N+1
     public List<GroupResponse> findAllByUserId(Long userId) {
         List<UserGroup> userGroups = userGroupRepository.findAllByUserId(userId);
         return userGroups.stream()
@@ -61,11 +75,48 @@ public class GroupService {
 
     // dirtyCheking으로 DB 자동 반영하기
     @Transactional
-    public void editGroup(Long groupId, GroupEditRequest dto) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
+    public void editGroup(Long groupId, Long userId, GroupEditRequest dto) {
+        Group group = getGroupWithManagerCheck(groupId, userId);
         group.edit(dto);
     }
 
-    // TODO: 그룹 삭제
+    @Transactional
+    public void groupExit(Long groupId, Long userId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
+
+        // TODO: QueryDSL
+        List<Food> userFoodsInGroup = foodRepository.findAllByUserIdAndGroupId(userId, groupId);
+        for (Food food : userFoodsInGroup) {
+            food.clearGroup();
+        }
+
+        // 멤버가 1명뿐이라면 그룹 삭제
+        if (group.getMembers().size() == 1) {
+            this.deleteGroup(groupId, userId);
+            return;
+        }
+
+        // 방장 위임 및 멤버 삭제
+        UserGroup exitMember = userGroupRepository.findByGroupIdAndUserId(groupId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_A_GROUP_MEMBER));
+
+        if (group.getManager().getId().equals(userId)) {
+            User nextManager = group.getMembers().stream()
+                    .map(UserGroup::getUser)
+                    .filter(user -> !user.getId().equals(userId))
+                    .findFirst()
+                    .orElseThrow(() -> new CustomException(ErrorCode.NO_REMAINING_MEMBER));
+
+            group.changeManager(nextManager);
+        }
+
+        group.getMembers().remove(exitMember);
+    }
+
+    @Transactional
+    public void deleteGroup(Long groupId, Long userId) {
+        Group group = getGroupWithManagerCheck(groupId, userId);
+        groupRepository.delete(group);
+    }
 }

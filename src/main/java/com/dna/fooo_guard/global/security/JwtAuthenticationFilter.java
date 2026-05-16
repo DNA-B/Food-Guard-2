@@ -13,7 +13,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -29,18 +31,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = bearerToken.substring(7);
 
             try {
-                // User ID 가져오기
+                jwtTokenProvider.validateToken(token);
                 Long userId = jwtTokenProvider.getUserIdFromToken(token);
 
-                // 인증 객체 생성 (권한은 일단 "USER"로 고정)
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId,
-                        null, Collections.emptyList());
+                // 인증 객체 생성
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userId, null, Collections.emptyList());
 
                 // 시큐리티 세션(Context)에 인증 정보 저장
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } catch (Exception e) {
-                // 일단 그냥 통과시켜서 다음 필터에서 걸러지게 두기.
+                log.error("Security Context에 인증 정보를 설정할 수 없습니다.", e);
+                SecurityContextHolder.clearContext();
             }
         }
 

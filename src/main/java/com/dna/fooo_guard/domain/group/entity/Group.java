@@ -7,6 +7,8 @@ import com.dna.fooo_guard.domain.group.dto.GroupEditRequest;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.domain.userGroup.entity.UserGroup;
 import com.dna.fooo_guard.global.BaseEntity;
+import com.dna.fooo_guard.global.error.CustomException;
+import com.dna.fooo_guard.global.error.ErrorCode;
 import com.dna.fooo_guard.global.util.CommonUtil;
 
 import jakarta.persistence.CascadeType;
@@ -67,7 +69,16 @@ public class Group extends BaseEntity {
                 .group(this)
                 .build();
         this.members.add(userGroup);
-        user.getGroups().add(userGroup);
     }
-    // edit function start
+
+    // Group.java 내부의 edit function 구역에 추가해 주세요!
+
+    public void changeManager(User nextManager) {
+        if (nextManager == null) {
+            throw new CustomException(ErrorCode.INVALID_MANAGER_ASSIGNMENT);
+        }
+
+        this.manager = nextManager;
+    }
+    // edit function end
 }
