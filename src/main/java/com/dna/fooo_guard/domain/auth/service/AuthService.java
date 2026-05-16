@@ -29,6 +29,10 @@ public class AuthService {
             throw new CustomException(ErrorCode.DUPLICATE_USERNAME);
         }
 
+        if (userRepository.existsByNickname(dto.getNickname())) {
+            throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
         User user = User.builder()
                 .username(dto.getUsername())
                 .password(passwordEncoder.encode(dto.getPassword()))
@@ -43,7 +47,7 @@ public class AuthService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+            throw new CustomException(ErrorCode.LOGIN_FAILED);
         }
 
         String token = jwtTokenProvider.createToken(user.getId());

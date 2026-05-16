@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dna.fooo_guard.domain.comment.entity.Comment;
+import com.dna.fooo_guard.domain.comment.repository.CommentRepository;
 import com.dna.fooo_guard.domain.post.dto.PostCreateRequest;
 import com.dna.fooo_guard.domain.post.dto.PostEditRequest;
 import com.dna.fooo_guard.domain.post.dto.PostResponse;
@@ -23,8 +25,8 @@ import lombok.RequiredArgsConstructor;
 public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
-    // Helper Function start
     private Post getPostWithAccessCheck(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
@@ -35,29 +37,28 @@ public class PostService {
 
         return post;
     }
-    // Helper Function end
 
     @Transactional
     public void createPost(PostCreateRequest dto, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.getReferenceById(userId);
         Post newPost = dto.toEntity(user);
         postRepository.save(newPost);
     }
 
     public List<PostResponse> findAllPost() {
+        // TODO: N+1 추후 QueryDSL 도입 시 Fetch Join 최적화 예정
         List<Post> posts = postRepository.findAll();
         return posts.stream()
-                .map(post -> PostResponse.from(post))
+                .map(PostResponse::from)
                 .toList();
     }
 
-    public PostResponse findPostByIdAndUserId(Long postId, Long userId) {
-        Post post = getPostWithAccessCheck(postId, userId);
+    public PostResponse findPostById(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         return PostResponse.from(post);
     }
 
-    // dirtyCheking으로 DB 자동 반영하기
     @Transactional
     public void editPost(Long postId, Long userId, PostEditRequest dto) {
         Post post = getPostWithAccessCheck(postId, userId);
@@ -67,7 +68,13 @@ public class PostService {
     @Transactional
     public void deletePost(Long postId, Long userId) {
         Post post = getPostWithAccessCheck(postId, userId);
+
+        // TODO: 추후 QueryDSL 도입 시 벌크 업데이트 연산으로 마이그레이션 예정
+        List<Comment> comments = commentRepository.findAllByPostId(postId);
+        for (Comment comment : comments) {
+            comment.delete();
+        }
+
         postRepository.delete(post);
     }
-
 }

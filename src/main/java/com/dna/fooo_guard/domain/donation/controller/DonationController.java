@@ -43,10 +43,8 @@ public class DonationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DonationResponse> getDonation(
-            @PathVariable("id") Long id,
-            @AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(donationService.findDonationById(id, userId));
+    public ResponseEntity<DonationResponse> getDonation(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(donationService.findDonationById(id));
     }
 
     @PutMapping("/{id}")

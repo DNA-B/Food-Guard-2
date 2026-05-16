@@ -28,7 +28,6 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
 
-    // Helper Function start
     private Comment getCommentWithAccessCheck(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
@@ -39,12 +38,10 @@ public class CommentService {
 
         return comment;
     }
-    // Helper Function end
 
     @Transactional
     public void createComment(CommentCreateRequest dto, Long postId, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.getReferenceById(userId);
         Long parentId = dto.getParentId();
 
         if (dto.getParentId() != null) {
@@ -59,7 +56,7 @@ public class CommentService {
                 throw new CustomException(ErrorCode.ALREADY_DELETED_COMMENT);
             }
 
-            // 만약 대댓글을 달려는 대상이 이미 parentId를 갖고 있다면 그것으로 교체
+            // 대댓글의 깊이를 최대 2단계(부모-자식)로 제한하기 위한 평탄화 작업
             if (parent.getParentId() != null) {
                 parentId = parent.getParentId();
             }
@@ -69,14 +66,14 @@ public class CommentService {
         commentRepository.save(newComment);
     }
 
-    // TODO: User 정보 가져올 때, N+1 문제
     public List<CommentResponse> findAllCommentByPostId(Long postId) {
+        // TODO: N+1
         List<Comment> comments = commentRepository.findAllByPostId(postId);
 
         Map<Long, CommentResponse> rootMap = new HashMap<>();
         List<CommentResponse> roots = new ArrayList<>();
 
-        // 최상위 부모들만 먼저 골라내서 Map에 저장
+        // 최상위 부모 댓글 먼저 골라내서 Map 및 결과 리스트에 세팅
         for (Comment comment : comments) {
             if (comment.getParentId() == null) {
                 CommentResponse dto = CommentResponse.from(comment);
@@ -85,7 +82,7 @@ public class CommentService {
             }
         }
 
-        // 나머지 자식들 parentId 보고 rootMap에서 부모 찾아서 리스트에 추가
+        // 부모 DTO의 children 리스트에 추가
         for (Comment comment : comments) {
             if (comment.getParentId() != null) {
                 CommentResponse parentDto = rootMap.get(comment.getParentId());
@@ -103,14 +100,12 @@ public class CommentService {
         return CommentResponse.from(comment);
     }
 
-    // dirtyCheking으로 DB 자동 반영하기
     @Transactional
     public void editComment(CommentEditRequest dto, Long commentId, Long userId) {
         Comment comment = getCommentWithAccessCheck(commentId, userId);
         comment.edit(dto);
     }
 
-    // dirtyCheking으로 DB 자동 반영하기
     @Transactional
     public void deleteComment(Long commentId, Long userId) {
         Comment comment = getCommentWithAccessCheck(commentId, userId);

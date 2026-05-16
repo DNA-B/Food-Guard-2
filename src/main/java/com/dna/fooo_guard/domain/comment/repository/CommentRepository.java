@@ -10,7 +10,10 @@ import com.dna.fooo_guard.domain.comment.entity.Comment;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    Optional<Comment> findByIdAndUserId(Long CommentId, Long userId);
+    List<Comment> findAllByUserId(Long userId);
 
     List<Comment> findAllByPostId(Long postId);
+
+    Optional<Comment> findByIdAndUserId(Long CommentId, Long userId);
+
 }
