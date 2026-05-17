@@ -32,7 +32,7 @@ public class CommentResponse {
         return CommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
-                .parentId(comment.getParentId())
+                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
                 .status(comment.getStatus())
                 .updatedAt(comment.getUpdatedAt())
                 .build();
