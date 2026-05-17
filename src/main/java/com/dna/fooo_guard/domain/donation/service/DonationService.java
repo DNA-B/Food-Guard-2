@@ -35,7 +35,7 @@ public class DonationService {
 
     private Donation getDonationWithAccessCheck(Long donationId, Long userId) {
         Donation donation = donationRepository.findById(donationId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DONATION_NOT_FOUND));
 
         if (!donation.getPost().getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
