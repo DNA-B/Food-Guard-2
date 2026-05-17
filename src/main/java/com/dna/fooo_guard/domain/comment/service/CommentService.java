@@ -14,6 +14,8 @@ import com.dna.fooo_guard.domain.comment.dto.CommentResponse;
 import com.dna.fooo_guard.domain.comment.entity.Comment;
 import com.dna.fooo_guard.domain.comment.entity.CommentStatus;
 import com.dna.fooo_guard.domain.comment.repository.CommentRepository;
+import com.dna.fooo_guard.domain.post.entity.Post;
+import com.dna.fooo_guard.domain.post.repository.PostRepository;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.domain.user.repository.UserRepository;
 import com.dna.fooo_guard.global.error.CustomException;
@@ -27,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
     private Comment getCommentWithAccessCheck(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
@@ -42,13 +45,15 @@ public class CommentService {
     @Transactional
     public void createComment(CommentCreateRequest dto, Long postId, Long userId) {
         User user = userRepository.getReferenceById(userId);
-        Long parentId = dto.getParentId();
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+        Comment parent = null;
 
         if (dto.getParentId() != null) {
-            Comment parent = commentRepository.findById(dto.getParentId())
+            parent = commentRepository.findById(dto.getParentId())
                     .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 
-            if (!parent.getPostId().equals(postId)) {
+            if (!parent.getPost().getId().equals(postId)) {
                 throw new CustomException(ErrorCode.INVALID_PARENT_COMMENT);
             }
 
@@ -57,12 +62,12 @@ public class CommentService {
             }
 
             // 대댓글의 깊이를 최대 2단계(부모-자식)로 제한하기 위한 평탄화 작업
-            if (parent.getParentId() != null) {
-                parentId = parent.getParentId();
+            if (parent.getParent() != null) {
+                parent = parent.getParent();
             }
         }
 
-        Comment newComment = dto.toEntity(user, postId, parentId);
+        Comment newComment = dto.toEntity(user, post, parent);
         commentRepository.save(newComment);
     }
 
@@ -75,7 +80,7 @@ public class CommentService {
 
         // 최상위 부모 댓글 먼저 골라내서 Map 및 결과 리스트에 세팅
         for (Comment comment : comments) {
-            if (comment.getParentId() == null) {
+            if (comment.getParent() == null) {
                 CommentResponse dto = CommentResponse.from(comment);
                 rootMap.put(dto.getId(), dto);
                 roots.add(dto);
@@ -84,8 +89,8 @@ public class CommentService {
 
         // 부모 DTO의 children 리스트에 추가
         for (Comment comment : comments) {
-            if (comment.getParentId() != null) {
-                CommentResponse parentDto = rootMap.get(comment.getParentId());
+            if (comment.getParent() != null) {
+                CommentResponse parentDto = rootMap.get(comment.getParent().getId());
                 if (parentDto != null) {
                     parentDto.getChildren().add(CommentResponse.from(comment));
                 }

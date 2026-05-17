@@ -1,6 +1,7 @@
 package com.dna.fooo_guard.domain.comment.entity;
 
 import com.dna.fooo_guard.domain.comment.dto.CommentEditRequest;
+import com.dna.fooo_guard.domain.post.entity.Post;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.global.BaseEntity;
 import com.dna.fooo_guard.global.util.CommonUtil;
@@ -41,11 +42,13 @@ public class Comment extends BaseEntity {
     @Column(name = "content", nullable = false, length = 500, comment = "댓글 내용")
     private String content;
 
-    @Column(name = "post_id", nullable = false, comment = "댓글이 달린 게시글의 ID")
-    private Long postId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT), comment = "댓글이 달린 게시글 ID")
+    private Post post;
 
-    @Column(name = "parent_id", comment = "부모 댓글의 ID")
-    private Long parentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT), comment = "부모 댓글 ID")
+    private Comment parent;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20, comment = "댓글 상태 (PUBLISHED: 게시됨, EDITED: 수정됨, DELETED: 삭제됨)")
