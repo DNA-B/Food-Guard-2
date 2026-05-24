@@ -4,8 +4,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dna.fooo_guard.domain.auth.dto.LoginResponse;
+import com.dna.fooo_guard.domain.auth.dto.CheckNicknameRequest;
 import com.dna.fooo_guard.domain.auth.dto.LoginRequest;
+import com.dna.fooo_guard.domain.auth.dto.LoginResponse;
 import com.dna.fooo_guard.domain.auth.dto.SignUpRequest;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.domain.user.repository.UserRepository;
@@ -22,6 +23,10 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+
+    public boolean isNicknameAvailable(CheckNicknameRequest dto) {
+        return !userRepository.existsByNickname(dto.getNickname());
+    }
 
     @Transactional
     public String signUp(SignUpRequest dto) {

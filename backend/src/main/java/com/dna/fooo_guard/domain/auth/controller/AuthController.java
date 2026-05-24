@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dna.fooo_guard.domain.auth.dto.LoginResponse;
+import com.dna.fooo_guard.domain.auth.dto.CheckNicknameRequest;
 import com.dna.fooo_guard.domain.auth.dto.LoginRequest;
 import com.dna.fooo_guard.domain.auth.dto.SignUpRequest;
 import com.dna.fooo_guard.domain.auth.service.AuthService;
@@ -27,5 +28,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest dto) {
         return ResponseEntity.ok(authService.login(dto));
+    }
+
+    @PostMapping("/check/nickname")
+    public ResponseEntity<Boolean> checkNickname(@RequestBody CheckNicknameRequest dto) {
+        return ResponseEntity.ok(authService.isNicknameAvailable(dto));
     }
 }
