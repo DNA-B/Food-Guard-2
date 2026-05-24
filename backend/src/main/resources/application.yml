@@ -1,6 +1,9 @@
 spring:
   application:
     name: fooo-guard
+  config:
+    import: optional:file:.env[.properties]
+
   servlet:
     encoding:
       charset: UTF-8
