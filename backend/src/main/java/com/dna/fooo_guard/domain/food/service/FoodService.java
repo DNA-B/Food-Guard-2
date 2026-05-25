@@ -1,5 +1,7 @@
 package com.dna.fooo_guard.domain.food.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,13 @@ public class FoodService {
 
         Food newFood = dto.toEntity(user, group);
         foodRepository.save(newFood);
+    }
+
+    public List<FoodResponse> findAllFoodByUserId(Long userId) {
+        List<Food> foods = foodRepository.findAllByUserId(userId);
+        return foods.stream()
+                .map(FoodResponse::from)
+                .toList();
     }
 
     public FoodResponse findFoodByIdAndUserId(Long foodId, Long userId) {

@@ -12,6 +12,8 @@ import com.dna.fooo_guard.domain.food.entity.Food;
 public interface FoodRepository extends JpaRepository<Food, Long> {
     Optional<Food> findByIdAndUserId(Long foodId, Long userId);
 
+    List<Food> findAllByUserId(Long userId);
+
     List<Food> findAllByGroupId(Long groupId);
 
     List<Food> findAllByUserIdAndGroupId(Long userId, Long groupId);
