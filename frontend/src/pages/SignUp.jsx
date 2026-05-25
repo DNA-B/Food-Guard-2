@@ -8,39 +8,44 @@ function SignUp({ onNavigate }) {
   const [nickname, setNickname] = useState("");
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
 
-  // 1. 닉네임 중복 체크 (백엔드 @RequestBody 설계에 맞춰 POST JSON으로 연동)
+  const [nicknameMessage, setNicknameMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
+
+  // 💡 중복되는 안내 메시지 설정을 하나로 묶는 헬퍼 함수
+  const updateMessage = (message, type = "warning", checkedStatus = false) => {
+    setNicknameMessage(message);
+    setMessageType(type);
+    setIsNicknameChecked(checkedStatus);
+  };
+
+  // 1. 닉네임 중복 체크
   const checkNicknameDuplicate = async () => {
-    if (!nickname.trim()) {
-      alert("닉네임을 입력해주세요.");
-      return;
-    }
+    if (!nickname.trim())
+      return updateMessage("닉네임을 입력해주세요.", "warning");
+
     try {
       const response = await customFetch("/auth/check/nickname", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ nickname: nickname }),
+        body: JSON.stringify({ nickname }),
       });
 
-      if (response.ok) {
-        const isAvailable = await response.json(); // 백엔드가 주는 true/false 파싱
+      if (!response.ok)
+        return updateMessage(
+          "이미 사용 중이거나 사용할 수 없는 닉네임입니다.",
+          "warning",
+        );
 
-        if (isAvailable) {
-          alert("사용 가능한 닉네임입니다! 👍");
-          setIsNicknameChecked(true);
-        } else {
-          alert("이미 사용 중인 닉네임입니다. ❌");
-          setIsNicknameChecked(false);
-        }
+      const isAvailable = await response.json();
+      if (isAvailable) {
+        updateMessage("사용 가능한 닉네임입니다! 👍", "success", true);
       } else {
-        alert("이미 사용 중이거나 사용할 수 없는 닉네임입니다.");
-        setIsNicknameChecked(false);
+        updateMessage("이미 사용 중인 닉네임입니다. ❌", "warning", false);
       }
     } catch (error) {
       console.error(error);
-      alert("중복 체크 통신 실패");
+      updateMessage("중복 체크 통신에 실패했습니다.", "error");
     }
   };
 
@@ -48,10 +53,8 @@ function SignUp({ onNavigate }) {
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    if (!isNicknameChecked) {
-      alert("닉네임 중복 체크를 먼저 진행해주세요.");
-      return;
-    }
+    if (!isNicknameChecked)
+      return updateMessage("닉네임 중복 체크를 먼저 진행해주세요.", "warning");
 
     try {
       const response = await customFetch("/auth/signup", {
@@ -60,7 +63,6 @@ function SignUp({ onNavigate }) {
       });
 
       if (response.ok) {
-        alert("회원가입 완료! 로그인 페이지로 이동합니다. 🎉");
         onNavigate("login");
       } else {
         alert("회원가입 실패. 입력 정보를 다시 확인해주세요.");
@@ -95,6 +97,7 @@ function SignUp({ onNavigate }) {
               required
             />
           </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-500 mb-1">
               비밀번호
@@ -119,7 +122,7 @@ function SignUp({ onNavigate }) {
                 value={nickname}
                 onChange={(e) => {
                   setNickname(e.target.value);
-                  setIsNicknameChecked(false);
+                  updateMessage("", "", false); // 입력 변경 시 메시지 싹 비우기
                 }}
                 className="flex-1 bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm focus:outline-none focus:border-emerald-500 font-medium"
                 placeholder="동네에서 사용할 닉네임"
@@ -133,9 +136,18 @@ function SignUp({ onNavigate }) {
                 중복 체크
               </button>
             </div>
-            {isNicknameChecked && (
-              <p className="text-[11px] text-emerald-600 mt-1.5 font-semibold">
-                ✓ 닉네임 검증 완료
+
+            {nicknameMessage && (
+              <p
+                className={`text-[11px] mt-1.5 font-semibold ${
+                  messageType === "success"
+                    ? "text-emerald-600"
+                    : messageType === "warning"
+                      ? "text-amber-500"
+                      : "text-red-500"
+                }`}
+              >
+                {nicknameMessage}
               </p>
             )}
           </div>
