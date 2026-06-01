@@ -18,45 +18,69 @@ import com.dna.fooo_guard.domain.group.dto.GroupEditRequest;
 import com.dna.fooo_guard.domain.group.dto.GroupResponse;
 import com.dna.fooo_guard.domain.group.service.GroupService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Group", description = "그룹 관리 API")
 @RestController
 @RequestMapping("/api/v1/groups")
 @RequiredArgsConstructor
 public class GroupController {
     private final GroupService groupService;
 
+    @Operation(summary = "그룹 생성", description = "로그인한 사용자가 새 그룹을 생성합니다.")
+    @ApiResponse(responseCode = "200", description = "생성 성공")
     @PostMapping
-    public ResponseEntity<Void> createGroup(@RequestBody GroupCreateRequest dto, @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<Void> createGroup(@RequestBody GroupCreateRequest dto,
+            @Parameter(hidden = true) @AuthenticationPrincipal Long userId) {
         groupService.createGroup(dto, userId);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "내 그룹 목록 조회", description = "로그인한 사용자가 속한 그룹 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GroupResponse.class))))
     @GetMapping("/me")
-    public ResponseEntity<List<GroupResponse>> getGroups(@AuthenticationPrincipal Long userId) {
+    public ResponseEntity<List<GroupResponse>> getGroups(@Parameter(hidden = true) @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok(groupService.findAllByUserId(userId));
     }
 
+    @Operation(summary = "그룹 단건 조회", description = "그룹 ID로 상세 정보를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = GroupResponse.class)))
     @GetMapping("/{id}")
-    public ResponseEntity<GroupResponse> getGroup(@PathVariable("id") Long id) {
+    public ResponseEntity<GroupResponse> getGroup(@Parameter(description = "그룹 ID", example = "1") @PathVariable("id") Long id) {
         return ResponseEntity.ok(groupService.findGroupById(id));
     }
 
+    @Operation(summary = "그룹 수정", description = "그룹 관리자가 그룹 정보를 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
     @PutMapping("/{id}")
-    public ResponseEntity<Void> editGroup(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId,
+    public ResponseEntity<Void> editGroup(@Parameter(description = "그룹 ID", example = "1") @PathVariable("id") Long id,
+            @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
             @RequestBody GroupEditRequest dto) {
         groupService.editGroup(id, userId, dto);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "그룹 탈퇴", description = "로그인한 사용자가 그룹에서 탈퇴합니다.")
+    @ApiResponse(responseCode = "200", description = "탈퇴 성공")
     @PostMapping("/{id}/exit")
-    public ResponseEntity<Void> groupExit(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<Void> groupExit(@Parameter(description = "그룹 ID", example = "1") @PathVariable("id") Long id,
+            @Parameter(hidden = true) @AuthenticationPrincipal Long userId) {
         groupService.groupExit(id, userId);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "그룹 삭제", description = "그룹 관리자가 그룹을 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "삭제 성공")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGroup(@PathVariable("id") Long id, @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<Void> deleteGroup(@Parameter(description = "그룹 ID", example = "1") @PathVariable("id") Long id,
+            @Parameter(hidden = true) @AuthenticationPrincipal Long userId) {
         groupService.deleteGroup(id, userId);
         return ResponseEntity.ok().build();
     }
