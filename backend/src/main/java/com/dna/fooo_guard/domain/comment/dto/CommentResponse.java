@@ -27,10 +27,13 @@ public class CommentResponse {
     @Schema(description = "댓글 내용", example = "좋은 정보 감사합니다.")
     private String content;
 
+    @Schema(description = "작성자 닉네임", example = "푸드가드")
+    private String author;
+
     @Schema(description = "부모 댓글 ID. 최상위 댓글이면 null", example = "1", nullable = true)
     private Long parentId;
 
-    @Schema(description = "댓글 상태", example = "PUBLISHED", allowableValues = {"PUBLISHED", "EDITED", "DELETED"})
+    @Schema(description = "댓글 상태", example = "PUBLISHED", allowableValues = { "PUBLISHED", "EDITED", "DELETED" })
     private CommentStatus status;
 
     @Schema(description = "수정일시", example = "2026-06-02T10:30:00", type = "string", format = "date-time")
@@ -45,6 +48,7 @@ public class CommentResponse {
         return CommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
+                .author(comment.getUser() != null ? comment.getUser().getNickname() : null)
                 .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
                 .status(comment.getStatus())
                 .updatedAt(comment.getUpdatedAt())

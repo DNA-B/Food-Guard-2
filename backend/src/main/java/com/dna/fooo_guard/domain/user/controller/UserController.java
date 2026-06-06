@@ -44,12 +44,15 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "내 그룹 목록 조회", description = "로그인한 사용자가 속한 그룹 목록을 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserGroupResponse.class))))
-    @GetMapping("/groups")
-    public ResponseEntity<List<UserGroupResponse>> findUserGroupsById(
-            @Parameter(hidden = true) @AuthenticationPrincipal Long id) {
-        return ResponseEntity.ok(userService.findUserGroupsById(id));
-    }
+    // @Operation(summary = "내 그룹 목록 조회", description = "로그인한 사용자가 속한 그룹 목록을
+    // 조회합니다.")
+    // @ApiResponse(responseCode = "200", description = "조회 성공", content =
+    // @Content(array = @ArraySchema(schema = @Schema(implementation =
+    // UserGroupResponse.class))))
+    // @GetMapping("/groups")
+    // public ResponseEntity<List<UserGroupResponse>> findUserGroupsById(
+    // @Parameter(hidden = true) @AuthenticationPrincipal Long id) {
+    // return ResponseEntity.ok(userService.findUserGroupsById(id));
+    // }
 
 }
