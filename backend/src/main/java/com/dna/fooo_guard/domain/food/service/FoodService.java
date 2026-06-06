@@ -43,7 +43,11 @@ public class FoodService {
     @Transactional
     public void createFood(FoodCreateRequest dto, Long userId) {
         User user = userRepository.getReferenceById(userId);
-        Group group = groupRepository.getReferenceById(dto.getGroupId());
+
+        Group group = null;
+        if (dto.getGroupId() != null) {
+            group = groupRepository.getReferenceById(dto.getGroupId());
+        }
 
         Food newFood = dto.toEntity(user, group);
         foodRepository.save(newFood);

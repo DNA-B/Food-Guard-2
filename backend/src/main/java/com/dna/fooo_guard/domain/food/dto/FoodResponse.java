@@ -33,6 +33,9 @@ public class FoodResponse {
     @Schema(description = "소비기한", example = "2026-06-30", type = "string", format = "date")
     private LocalDate expiryAt;
 
+    @Schema(description = "그룹 ID", example = "1", nullable = true)
+    private Long groupId;
+
     // Entity -> DTO
     public static FoodResponse from(Food food) {
         return FoodResponse.builder()
@@ -41,6 +44,7 @@ public class FoodResponse {
                 .type(food.getType())
                 .description(food.getDescription())
                 .expiryAt(food.getExpiryAt())
+                .groupId(food.getGroup() != null ? food.getGroup().getId() : null)
                 .build();
     }
 }

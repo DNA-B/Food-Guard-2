@@ -3,7 +3,6 @@ package com.dna.fooo_guard.domain.user.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dna.fooo_guard.domain.food.entity.Food;
 import com.dna.fooo_guard.domain.userGroup.entity.UserGroup;
 import com.dna.fooo_guard.global.BaseEntity;
 
