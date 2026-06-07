@@ -16,6 +16,7 @@ export function PostPage({
   setActiveParentId,
   createComment,
   formatDate,
+  me,
 }) {
   return (
     <section className="two-column">
@@ -64,13 +65,15 @@ export function PostPage({
                       {post.author} • {formatDate(post.createdAt)}
                     </small>
                   </div>
-                  <button
-                    className="danger-button compact"
-                    type="button"
-                    onClick={() => deletePost(post.id)}
-                  >
-                    삭제
-                  </button>
+                  {me?.nickname === post.author && (
+                    <button
+                      className="danger-button compact"
+                      type="button"
+                      onClick={() => deletePost(post.id)}
+                    >
+                      삭제
+                    </button>
+                  )}
                 </div>
                 <p className="card-body">{post.content}</p>
                 <div className="card-footer">

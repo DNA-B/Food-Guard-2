@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Food", description = "사용자 식품 관리 API")
@@ -37,7 +38,7 @@ public class FoodController {
     @Operation(summary = "식품 등록", description = "로그인한 사용자의 식품을 등록합니다.")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping
-    public ResponseEntity<Void> createFood(@RequestBody FoodCreateRequest dto,
+    public ResponseEntity<Void> createFood(@Valid @RequestBody FoodCreateRequest dto,
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId) {
         foodService.createFood(dto, userId);
         return ResponseEntity.ok().build();
@@ -53,7 +54,8 @@ public class FoodController {
     @Operation(summary = "식품 단건 조회", description = "식품 ID로 로그인한 사용자의 식품 상세 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = FoodResponse.class)))
     @GetMapping("/{id}")
-    public ResponseEntity<FoodResponse> getFood(@Parameter(description = "식품 ID", example = "1") @PathVariable("id") Long id,
+    public ResponseEntity<FoodResponse> getFood(
+            @Parameter(description = "식품 ID", example = "1") @PathVariable("id") Long id,
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok(foodService.findFoodByIdAndUserId(id, userId));
     }
@@ -63,7 +65,7 @@ public class FoodController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> editFood(@Parameter(description = "식품 ID", example = "1") @PathVariable("id") Long id,
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
-            @RequestBody FoodEditRequest dto) {
+            @Valid @RequestBody FoodEditRequest dto) {
         foodService.editFood(id, userId, dto);
         return ResponseEntity.ok().build();
     }
