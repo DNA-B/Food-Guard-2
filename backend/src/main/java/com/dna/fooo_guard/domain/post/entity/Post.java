@@ -41,9 +41,8 @@ public class Post extends BaseEntity {
     @Column(name = "title", nullable = false, length = 20, comment = "게시물 제목")
     private String title;
 
-    @Builder.Default
-    @Column(name = "content", length = 500, comment = "게시물 내용")
-    private String content = "";
+    @Column(name = "content", nullable = false, length = 500, comment = "게시물 내용")
+    private String content;
 
     @Column(name = "image_url", length = 500, comment = "이미지 파일 저장 경로 (S3 URL 등)")
     private String imageURL;
