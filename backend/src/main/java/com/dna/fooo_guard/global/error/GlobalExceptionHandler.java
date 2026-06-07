@@ -1,6 +1,7 @@
 package com.dna.fooo_guard.global.error;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -15,6 +16,13 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
         log.error("CustomException: {}", e.getErrorCode().getMessage());
         return ErrorResponse.toResponseEntity(e.getErrorCode());
+    }
+
+    // @Valid 유효성 검증 실패 시 발생하는 예외 처리 (400 Bad Request)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error("MethodArgumentNotValidException: {}", e.getMessage());
+        return ErrorResponse.toResponseEntity(ErrorCode.INVALID_INPUT_VALUE);
     }
 
     // 500 Internal Server Error

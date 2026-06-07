@@ -4,6 +4,8 @@ import com.dna.fooo_guard.domain.post.entity.Post;
 import com.dna.fooo_guard.domain.user.entity.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,9 +20,13 @@ import lombok.NoArgsConstructor;
 public class PostCreateRequest {
 
     @Schema(description = "게시글 제목", example = "남는 식재료 보관 팁", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "게시글 제목은 필수 입력값입니다.")
+    @Size(max = 20, message = "제목은 20자 이하로 입력해주세요.")
     String title;
 
     @Schema(description = "게시글 내용", example = "냉장고 식재료를 오래 보관하는 방법을 공유합니다.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "게시글 내용은 필수 입력값입니다.")
+    @Size(max = 500, message = "내용은 500자 이하로 입력해주세요.")
     String content;
     // TODO: 이미지 파일 업로드 기능 추가 시, 이미지 관련 필드도 여기에 추가 (예: MultipartFile image)
 

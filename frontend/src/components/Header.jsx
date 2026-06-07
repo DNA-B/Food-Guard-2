@@ -8,12 +8,16 @@ const tabs = [
 ];
 
 function Header({ activeTab, isLoggedIn, onNavigate, onLogout }) {
+  const visibleTabs = isLoggedIn
+    ? tabs
+    : tabs.filter((tab) => tab.id !== "dashboard");
+
   return (
     <header className="app-header">
       <button
         className="brand"
         type="button"
-        onClick={() => onNavigate("dashboard")}
+        onClick={() => onNavigate(isLoggedIn ? "dashboard" : "auth")}
       >
         <span className="brand-mark">FG</span>
         <span>
@@ -23,7 +27,7 @@ function Header({ activeTab, isLoggedIn, onNavigate, onLogout }) {
       </button>
 
       <nav className="nav-tabs" aria-label="주요 메뉴">
-        {tabs.map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
             key={tab.id}
             type="button"

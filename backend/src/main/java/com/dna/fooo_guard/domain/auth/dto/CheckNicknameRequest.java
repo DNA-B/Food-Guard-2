@@ -1,6 +1,7 @@
 package com.dna.fooo_guard.domain.auth.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,5 +16,6 @@ import lombok.NoArgsConstructor;
 public class CheckNicknameRequest {
 
     @Schema(description = "중복 확인할 닉네임", example = "푸드가드", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "닉네임은 필수 입력값입니다.")
     private String nickname;
 }

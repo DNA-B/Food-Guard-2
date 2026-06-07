@@ -44,10 +44,10 @@ const getExpiryState = (expiryAt) => {
 };
 
 function App() {
-  const [activeTab, setActiveTab] = useState("dashboard");
   const [isLoggedIn, setIsLoggedIn] = useState(
     Boolean(localStorage.getItem("accessToken")),
   );
+  const [activeTab, setActiveTab] = useState(isLoggedIn ? "dashboard" : "auth");
 
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
@@ -124,14 +124,22 @@ function App() {
     }
   };
 
-  const refreshAll = async () => {
+  const refreshAll = async (forceRefresh = false) => {
     await loadPublicData();
-    await loadPrivateData();
+    if (isLoggedIn) {
+      await loadPrivateData();
+    }
   };
 
   useEffect(() => {
     void refreshAll();
   }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn && activeTab === "dashboard") {
+      setActiveTab("auth");
+    }
+  }, [activeTab, isLoggedIn]);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -144,7 +152,7 @@ function App() {
       chatRooms: [],
       messages: [],
     }));
-    setActiveTab("dashboard");
+    setActiveTab("auth");
   };
 
   // -------------------------------------------------------------
@@ -162,7 +170,7 @@ function App() {
   } = useAuth(
     setIsLoggedIn,
     setActiveTab,
-    refreshAll,
+    () => refreshAll(true),
     handleLogout,
     showError,
     setNotice,
@@ -194,6 +202,8 @@ function App() {
     comments,
     commentText,
     setCommentText,
+    activeParentId,
+    setActiveParentId,
     createPost,
     deletePost,
     openComments,
@@ -221,12 +231,20 @@ function App() {
   const updateGroupField = (field) => (event) =>
     setGroupForm((prev) => ({ ...prev, [field]: event.target.value }));
 
+  const handleNavigate = (tabId) => {
+    if (!isLoggedIn && tabId === "dashboard") {
+      setActiveTab("auth");
+      return;
+    }
+    setActiveTab(tabId);
+  };
+
   return (
     <div className="app-shell">
       <Header
         activeTab={activeTab}
         isLoggedIn={isLoggedIn}
-        onNavigate={setActiveTab}
+        onNavigate={handleNavigate}
         onLogout={handleLogout}
       />
 
@@ -292,6 +310,7 @@ function App() {
             setActiveParentId={setActiveParentId}
             createComment={createComment}
             formatDate={formatDate}
+            me={data.me}
           />
         )}
         {activeTab === "chats" && (

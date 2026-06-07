@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Post", description = "게시글 API")
@@ -37,7 +38,7 @@ public class PostController {
     @Operation(summary = "게시글 작성", description = "로그인한 사용자가 게시글을 작성합니다.")
     @ApiResponse(responseCode = "200", description = "작성 성공")
     @PostMapping
-    public ResponseEntity<Void> createPost(@RequestBody PostCreateRequest dto,
+    public ResponseEntity<Void> createPost(@Valid @RequestBody PostCreateRequest dto,
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId) {
         postService.createPost(dto, userId);
         return ResponseEntity.ok().build();
@@ -53,7 +54,8 @@ public class PostController {
     @Operation(summary = "게시글 단건 조회", description = "게시글 ID로 상세 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = PostResponse.class)))
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPost(@Parameter(description = "게시글 ID", example = "1") @PathVariable("id") Long id) {
+    public ResponseEntity<PostResponse> getPost(
+            @Parameter(description = "게시글 ID", example = "1") @PathVariable("id") Long id) {
         return ResponseEntity.ok(postService.findPostById(id));
     }
 
@@ -62,7 +64,7 @@ public class PostController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> editPost(@Parameter(description = "게시글 ID", example = "1") @PathVariable("id") Long id,
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
-            @RequestBody PostEditRequest dto) {
+            @Valid @RequestBody PostEditRequest dto) {
         postService.editPost(id, userId, dto);
         return ResponseEntity.ok().build();
     }
@@ -70,7 +72,8 @@ public class PostController {
     @Operation(summary = "게시글 삭제", description = "게시글 작성자가 게시글을 삭제합니다.")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@Parameter(description = "게시글 ID", example = "1") @PathVariable("id") Long id,
+    public ResponseEntity<Void> deletePost(
+            @Parameter(description = "게시글 ID", example = "1") @PathVariable("id") Long id,
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId) {
         postService.deletePost(id, userId);
         return ResponseEntity.ok().build();
