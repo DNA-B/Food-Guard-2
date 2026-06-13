@@ -71,9 +71,10 @@ public class CommentService {
         commentRepository.save(newComment);
     }
 
+    // TODO: N+1 속도 비교 (from의 getUser와 getParent)
     public List<CommentResponse> findAllCommentByPostId(Long postId) {
-        // TODO: N+1
-        List<Comment> comments = commentRepository.findAllByPostId(postId);
+        // List<Comment> comments = commentRepository.findAllByPostId(postId);
+        List<Comment> comments = commentRepository.findAllByPostIdWithParent(postId);
 
         Map<Long, CommentResponse> rootMap = new HashMap<>();
         List<CommentResponse> roots = new ArrayList<>();
