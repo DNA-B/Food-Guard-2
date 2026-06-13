@@ -37,18 +37,20 @@ public class UserService {
         return UserResponse.from(user);
     }
 
-    public List<UserGroupResponse> findUserGroupsById(Long userId) {
-        List<UserGroup> userGroups = userGroupRepository.findAllByUserId(userId);
+    // // TODO: N+1 속도 비교
+    // public List<UserGroupResponse> findUserGroupsById(Long userId) {
+    // // List<UserGroup> userGroups = userGroupRepository.findAllByUserId(userId);
+    // List<UserGroup> userGroups =
+    // userGroupRepository.findAllByUserIdWithGroup(userId);
 
-        if (userGroups.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_GROUP_NOT_FOUND);
-        }
+    // if (userGroups.isEmpty()) {
+    // throw new CustomException(ErrorCode.USER_GROUP_NOT_FOUND);
+    // }
 
-        // TODO: N+1
-        return userGroups.stream()
-                .map(userGroup -> UserGroupResponse.from(userGroup.getGroup()))
-                .toList();
-    }
+    // return userGroups.stream()
+    // .map(userGroup -> UserGroupResponse.from(userGroup.getGroup()))
+    // .toList();
+    // }
 
     @Transactional
     public void deleteUser(Long id) {

@@ -60,7 +60,9 @@ public class GroupService {
 
     // TODO: N+1
     public List<GroupResponse> findAllByUserId(Long userId) {
-        List<UserGroup> userGroups = userGroupRepository.findAllByUserId(userId);
+        // List<UserGroup> userGroups = userGroupRepository.findAllByUserId(userId);
+        List<UserGroup> userGroups = userGroupRepository.findAllByUserIdWithGroup(userId);
+
         return userGroups.stream()
                 .map(userGroup -> GroupResponse.from(userGroup.getGroup()))
                 .toList();
