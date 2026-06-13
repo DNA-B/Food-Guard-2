@@ -1,0 +1,45 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: ["develop", "master"]
+    paths:
+      - "backend/**" # backend 폴더 안의 파일이 변경되었을 때만 이 빌드를 실행
+  pull_request:
+    branches: ["develop", "master"]
+    paths:
+      - "backend/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 소스 코드 가져오기
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Java 21 설정
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: "gradle"
+
+      # 3. Gradle 실행 권한 부여
+      - name: Grant execute permission for gradlew
+        run: chmod +x backend/gradlew
+
+      # 4. 빌드 및 테스트 실행
+      - name: Build and Test with Gradle
+        working-directory: ./backend
+        run: ./gradlew build
+
+      # 5. 테스트 결과 리포트 업로드
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: backend/build/test-results/test
