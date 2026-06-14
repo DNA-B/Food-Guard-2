@@ -52,13 +52,14 @@ public class GroupService {
         groupRepository.save(group);
     }
 
+    // TODO: id 이름 컨벤션 통일
     public GroupResponse findGroupById(Long id) {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.GROUP_NOT_FOUND));
         return GroupResponse.from(group);
     }
 
-    // TODO: N+1
+    // TODO: QueryDSL 속도 비교
     public List<GroupResponse> findAllByUserId(Long userId) {
         // List<UserGroup> userGroups = userGroupRepository.findAllByUserId(userId);
         List<UserGroup> userGroups = userGroupRepository.findAllByUserIdWithGroup(userId);
@@ -71,7 +72,7 @@ public class GroupService {
     public List<FoodResponse> findAllFoodById(Long id) {
         List<Food> foods = foodRepository.findAllByGroupId(id);
         return foods.stream()
-                .map(food -> FoodResponse.from(food))
+                .map(FoodResponse::from)
                 .toList();
     }
 
