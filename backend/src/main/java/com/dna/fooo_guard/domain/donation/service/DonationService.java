@@ -37,7 +37,7 @@ public class DonationService {
     private final CommentRepository commentRepository;
 
     private Donation getDonationWithAccessCheck(Long donationId, Long userId) {
-        Donation donation = donationRepository.findById(donationId)
+        Donation donation = donationRepository.findByIdWithPostAndFoodAndUser(donationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DONATION_NOT_FOUND));
 
         if (!donation.getPost().getUser().getId().equals(userId)) {
@@ -74,15 +74,22 @@ public class DonationService {
         donationRepository.save(donation);
     }
 
+    // TODO: QueryDSL 속도 비교
     public List<DonationResponse> findAllDonations() {
-        // TODO: N+1
-        return donationRepository.findAll().stream()
+        // return donationRepository.findAll().stream()
+        // .map(DonationResponse::from)
+        // .toList();
+        return donationRepository.findAllWithPostAndFoodAndUser().stream()
                 .map(DonationResponse::from)
                 .toList();
     }
 
+    // TODO: QueryDSL 속도 비교
     public DonationResponse findDonationById(Long donationId) {
-        Donation donation = donationRepository.findById(donationId)
+        // Donation donation = donationRepository.findById(donationId)
+        // .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+
+        Donation donation = donationRepository.findByIdWithPostAndFoodAndUser(donationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         return DonationResponse.from(donation);
     }

@@ -45,16 +45,20 @@ public class PostService {
         postRepository.save(newPost);
     }
 
+    // TODO: QueryDSL 속도 측정
     public List<PostResponse> findAllPost() {
-        // TODO: N+1 추후 QueryDSL 도입 시 Fetch Join 최적화 예정
-        List<Post> posts = postRepository.findAll();
+        // List<Post> posts = postRepository.findAll();
+        List<Post> posts = postRepository.findAllWithUser();
         return posts.stream()
                 .map(PostResponse::from)
                 .toList();
     }
 
+    // TODO: QueryDSL 속도 측정
     public PostResponse findPostById(Long postId) {
-        Post post = postRepository.findById(postId)
+        // Post post = postRepository.findById(postId)
+        // .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+        Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         return PostResponse.from(post);
     }

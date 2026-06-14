@@ -13,8 +13,6 @@ import com.dna.fooo_guard.domain.post.repository.PostRepository;
 import com.dna.fooo_guard.domain.user.dto.UserResponse;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.domain.user.repository.UserRepository;
-import com.dna.fooo_guard.domain.userGroup.dto.UserGroupResponse;
-import com.dna.fooo_guard.domain.userGroup.entity.UserGroup;
 import com.dna.fooo_guard.domain.userGroup.repository.UserGroupRepository;
 import com.dna.fooo_guard.global.error.CustomException;
 import com.dna.fooo_guard.global.error.ErrorCode;

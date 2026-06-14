@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.dna.fooo_guard.domain.food.entity.Food;
 
 @Repository
-public interface FoodRepository extends JpaRepository<Food, Long> {
+public interface FoodRepository extends JpaRepository<Food, Long>, FoodRepositoryCustom {
     Optional<Food> findByIdAndUserId(Long foodId, Long userId);
 
     List<Food> findAllByUserId(Long userId);

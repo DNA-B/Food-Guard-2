@@ -17,7 +17,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
     public List<Comment> findAllByPostIdWithParent(Long postId) {
         return queryFactory
                 .selectFrom(comment)
-                .leftJoin(comment.user).fetchJoin()
+                .leftJoin(comment.user).fetchJoin() // 작성자 hard delete니까 null 될 수 있음.
                 .where(comment.post.id.eq(postId))
                 .orderBy(comment.createdAt.asc())
                 .fetch();

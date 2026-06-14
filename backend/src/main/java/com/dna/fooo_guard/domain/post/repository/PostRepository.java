@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.dna.fooo_guard.domain.post.entity.Post;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
     List<Post> findAllByUserId(Long userId);
 
     Optional<Post> findByIdAndUserId(Long postId, Long userId);
