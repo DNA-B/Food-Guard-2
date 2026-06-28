@@ -69,7 +69,7 @@ public class UserService {
             for (Comment comment : postComments) {
                 comment.delete(); // 해당 글에 달린 댓글들 전부 소프트 삭제
             }
-            postRepository.delete(post);
+            postRepository.delete(post); // 하드 삭제
         }
 
         userGroupRepository.deleteAllByUserId(id);
