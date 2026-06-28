@@ -2,8 +2,6 @@ package com.dna.fooo_guard.domain.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 import java.util.Optional;
@@ -28,155 +26,155 @@ import com.dna.fooo_guard.global.security.JwtTokenProvider;
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private PasswordEncoder passwordEncoder;
-    @Mock
-    private JwtTokenProvider jwtTokenProvider;
-    @InjectMocks
-    private AuthService authService;
+        @Mock
+        private UserRepository userRepository;
+        @Mock
+        private PasswordEncoder passwordEncoder;
+        @Mock
+        private JwtTokenProvider jwtTokenProvider;
+        @InjectMocks
+        private AuthService authService;
 
-    @Test
-    @DisplayName("회원가입 성공")
-    void signUp_Success() {
-        // ------------------ [GIVEN] ------------------
-        SignUpRequest dto = SignUpRequest.builder()
-                .username("testUser")
-                .password("password123!")
-                .nickname("testNickname")
-                .build();
+        @Test
+        @DisplayName("회원가입 성공")
+        void signUp_Success() {
+                // ------------------ [GIVEN] ------------------
+                SignUpRequest dto = SignUpRequest.builder()
+                                .username("testUser")
+                                .password("password123!")
+                                .nickname("testNickname")
+                                .build();
 
-        given(userRepository.existsByUsername(anyString())).willReturn(false);
-        given(userRepository.existsByNickname(anyString())).willReturn(false);
-        given(passwordEncoder.encode(anyString())).willReturn("encodedPassword");
+                given(userRepository.existsByUsername(dto.getUsername())).willReturn(false);
+                given(userRepository.existsByNickname(dto.getNickname())).willReturn(false);
+                given(passwordEncoder.encode(dto.getPassword())).willReturn("encodedPassword");
 
-        // ------------------ [WHEN] ------------------
-        String result = authService.signUp(dto);
+                // ------------------ [WHEN] ------------------
+                String result = authService.signUp(dto);
 
-        // ------------------ [THEN] ------------------
-        assertThat(result).isEqualTo("유저[testUser] - 회원가입");
-    }
+                // ------------------ [THEN] ------------------
+                assertThat(result).isEqualTo(String.format("유저[%s] - 회원가입", dto.getUsername()));
+        }
 
-    @Test
-    @DisplayName("회원가입 실패 - username 중복")
-    void signUp_Failure_UsernameExists() {
-        // ------------------ [GIVEN] ------------------
-        SignUpRequest dto = SignUpRequest.builder()
-                .username("testUser")
-                .password("password123!")
-                .nickname("testNickname")
-                .build();
+        @Test
+        @DisplayName("회원가입 실패 - username 중복")
+        void signUp_Failure_UsernameExists() {
+                // ------------------ [GIVEN] ------------------
+                SignUpRequest dto = SignUpRequest.builder()
+                                .username("testUser")
+                                .password("password123!")
+                                .nickname("testNickname")
+                                .build();
 
-        given(userRepository.existsByUsername(anyString())).willReturn(true);
+                given(userRepository.existsByUsername(dto.getUsername())).willReturn(true);
 
-        // ------------------ [WHEN & THEN] ------------------
-        Throwable thrown = catchThrowable(() -> authService.signUp(dto));
-        assertThat(thrown)
-                .isInstanceOf(CustomException.class)
-                .satisfies(exception -> {
-                    CustomException customEx = (CustomException) exception;
-                    assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_USERNAME);
-                });
-    }
+                // ------------------ [WHEN & THEN] ------------------
+                Throwable thrown = catchThrowable(() -> authService.signUp(dto));
+                assertThat(thrown)
+                                .isInstanceOf(CustomException.class)
+                                .satisfies(exception -> {
+                                        CustomException customEx = (CustomException) exception;
+                                        assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_USERNAME);
+                                });
+        }
 
-    @Test
-    @DisplayName("회원가입 실패 - nickname 중복")
-    void signUp_Failure_NicknameExists() {
-        // ------------------ [GIVEN] ------------------
-        SignUpRequest dto = SignUpRequest.builder()
-                .username("testUser")
-                .password("password123!")
-                .nickname("testNickname")
-                .build();
+        @Test
+        @DisplayName("회원가입 실패 - nickname 중복")
+        void signUp_Failure_NicknameExists() {
+                // ------------------ [GIVEN] ------------------
+                SignUpRequest dto = SignUpRequest.builder()
+                                .username("testUser")
+                                .password("password123!")
+                                .nickname("testNickname")
+                                .build();
 
-        given(userRepository.existsByUsername(anyString())).willReturn(false);
-        given(userRepository.existsByNickname(anyString())).willReturn(true);
+                given(userRepository.existsByUsername(dto.getUsername())).willReturn(false);
+                given(userRepository.existsByNickname(dto.getNickname())).willReturn(true);
 
-        // ------------------ [WHEN & THEN] ------------------
-        Throwable thrown = catchThrowable(() -> authService.signUp(dto));
-        assertThat(thrown)
-                .isInstanceOf(CustomException.class)
-                .satisfies(exception -> {
-                    CustomException customEx = (CustomException) exception;
-                    assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_NICKNAME);
-                });
-    }
+                // ------------------ [WHEN & THEN] ------------------
+                Throwable thrown = catchThrowable(() -> authService.signUp(dto));
+                assertThat(thrown)
+                                .isInstanceOf(CustomException.class)
+                                .satisfies(exception -> {
+                                        CustomException customEx = (CustomException) exception;
+                                        assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_NICKNAME);
+                                });
+        }
 
-    @Test
-    @DisplayName("로그인 성공")
-    void login_Success() {
+        @Test
+        @DisplayName("로그인 성공")
+        void login_Success() {
 
-        // ------------------ [GIVEN] ------------------
-        LoginRequest dto = LoginRequest.builder()
-                .username("testUser")
-                .password("password123!")
-                .build();
+                // ------------------ [GIVEN] ------------------
+                LoginRequest dto = LoginRequest.builder()
+                                .username("testUser")
+                                .password("password123!")
+                                .build();
 
-        User fakeUser = User.builder()
-                .id(1L)
-                .username("testUser")
-                .password("password123!")
-                .build();
+                User fakeUser = User.builder()
+                                .id(1L)
+                                .username("testUser")
+                                .password("password123!")
+                                .build();
 
-        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(fakeUser));
-        given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
-        given(jwtTokenProvider.createToken(anyLong())).willReturn("jwt-token-for-testUser");
+                given(userRepository.findByUsername(dto.getUsername())).willReturn(Optional.of(fakeUser));
+                given(passwordEncoder.matches(dto.getPassword(), fakeUser.getPassword())).willReturn(true);
+                given(jwtTokenProvider.createToken(fakeUser.getId())).willReturn("acceess-token");
 
-        // ------------------ [WHEN] ------------------
-        LoginResponse response = authService.login(dto);
+                // ------------------ [WHEN] ------------------
+                LoginResponse response = authService.login(dto);
 
-        // ------------------ [THEN] ------------------
-        assertThat(response.getAccessToken()).isEqualTo("jwt-token-for-testUser");
-    }
+                // ------------------ [THEN] ------------------
+                assertThat(response.getAccessToken()).isEqualTo("acceess-token");
+        }
 
-    @Test
-    @DisplayName("로그인 실패 - 존재하지 않는 사용자")
-    void login_Failure_UserNotFound() {
-        // ------------------ [GIVEN] ------------------
-        LoginRequest dto = LoginRequest.builder()
-                .username("wrongUser")
-                .password("password123!")
-                .build();
+        @Test
+        @DisplayName("로그인 실패 - 존재하지 않는 사용자")
+        void login_Failure_UserNotFound() {
+                // ------------------ [GIVEN] ------------------
+                LoginRequest dto = LoginRequest.builder()
+                                .username("wrongUser")
+                                .password("password123!")
+                                .build();
 
-        given(userRepository.findByUsername(anyString())).willReturn(Optional.empty());
+                given(userRepository.findByUsername(dto.getUsername())).willReturn(Optional.empty());
 
-        // ------------------ [WHEN & THEN] ------------------
-        Throwable thrown = catchThrowable(() -> authService.login(dto));
-        assertThat(thrown)
-                .isInstanceOf(CustomException.class)
-                .satisfies(exception -> {
-                    CustomException customEx = (CustomException) exception;
-                    assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
-                });
-    }
+                // ------------------ [WHEN & THEN] ------------------
+                Throwable thrown = catchThrowable(() -> authService.login(dto));
+                assertThat(thrown)
+                                .isInstanceOf(CustomException.class)
+                                .satisfies(exception -> {
+                                        CustomException customEx = (CustomException) exception;
+                                        assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
+                                });
+        }
 
-    @Test
-    @DisplayName("로그인 실패 - 비밀번호 다름")
-    void login_Failure_WrongPassword() {
+        @Test
+        @DisplayName("로그인 실패 - 비밀번호 다름")
+        void login_Failure_WrongPassword() {
 
-        // ------------------ [GIVEN] ------------------
-        LoginRequest dto = LoginRequest.builder()
-                .username("testUser")
-                .password("password123!")
-                .build();
+                // ------------------ [GIVEN] ------------------
+                LoginRequest dto = LoginRequest.builder()
+                                .username("testUser")
+                                .password("password123!")
+                                .build();
 
-        User fakeUser = User.builder()
-                .id(1L)
-                .username("testUser")
-                .password("password123!")
-                .build();
+                User fakeUser = User.builder()
+                                .id(1L)
+                                .username("testUser")
+                                .password("password123!")
+                                .build();
 
-        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(fakeUser));
-        given(passwordEncoder.matches(anyString(), anyString())).willReturn(false);
+                given(userRepository.findByUsername(dto.getUsername())).willReturn(Optional.of(fakeUser));
+                given(passwordEncoder.matches(dto.getPassword(), fakeUser.getPassword())).willReturn(false);
 
-        // ------------------ [WHEN & THEN] ------------------
-        Throwable thrown = catchThrowable(() -> authService.login(dto));
-        assertThat(thrown)
-                .isInstanceOf(CustomException.class)
-                .satisfies(exception -> {
-                    CustomException customEx = (CustomException) exception;
-                    assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.LOGIN_FAILED);
-                });
-    }
+                // ------------------ [WHEN & THEN] ------------------
+                Throwable thrown = catchThrowable(() -> authService.login(dto));
+                assertThat(thrown)
+                                .isInstanceOf(CustomException.class)
+                                .satisfies(exception -> {
+                                        CustomException customEx = (CustomException) exception;
+                                        assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.LOGIN_FAILED);
+                                });
+        }
 }
