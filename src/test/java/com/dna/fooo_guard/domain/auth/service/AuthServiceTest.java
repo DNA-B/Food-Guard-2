@@ -91,7 +91,7 @@ class AuthServiceTest {
 
         @Nested
         @DisplayName("실패 케이스")
-        class Failed {
+        class Failure {
 
                 @Test
                 @DisplayName("회원가입 실패 - username 중복")

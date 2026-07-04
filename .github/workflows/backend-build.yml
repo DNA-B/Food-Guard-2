@@ -4,11 +4,17 @@ on:
   push:
     branches: ["develop", "main"]
     paths:
-      - "backend/**" # backend 폴더 안의 파일이 변경되었을 때만 이 빌드를 실행
+      - "src/**"
+      - "build.gradle"
+      - "settings.gradle"
+      - "gradle/**"
   pull_request:
     branches: ["develop", "main"]
     paths:
-      - "backend/**"
+      - "src/**"
+      - "build.gradle"
+      - "settings.gradle"
+      - "gradle/**"
 
 jobs:
   build:
@@ -29,11 +35,11 @@ jobs:
 
       # 3. Gradle 실행 권한 부여
       - name: Grant execute permission for gradlew
-        run: chmod +x backend/gradlew
+        run: chmod +x gradlew
 
       # 4. 빌드 및 테스트 실행
       - name: Build and Test with Gradle
-        working-directory: ./backend
+        working-directory: .
         run: ./gradlew build
 
       # 5. 테스트 결과 리포트 업로드
@@ -42,4 +48,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: backend/build/test-results/test
+          path: build/test-results/test

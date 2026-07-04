@@ -43,7 +43,7 @@ public class UserServiceTest {
     private PostRepository postRepository;
     @Mock
     private CommentRepository commentRepository;
-    @InjectMocks
+    @InjectMocks/
     private UserService userService;
 
     @Nested
@@ -105,7 +105,7 @@ public class UserServiceTest {
 
     @Nested
     @DisplayName("실패 케이스")
-    class Failed {
+    class Failure {
 
         @Test
         @DisplayName("유저 조회 실패 - 존재하지 않는 유저")
