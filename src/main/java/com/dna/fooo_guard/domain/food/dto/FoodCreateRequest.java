@@ -27,8 +27,7 @@ public class FoodCreateRequest {
     @NotBlank(message = "식품명은 필수 입력값입니다.")
     String name;
 
-    @Schema(description = "식품 종류", example = "DAIRY", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "식품 종류는 필수 선택사항입니다.")
+    @Schema(description = "식품 종류", example = "라면")    
     String type;
 
     @Schema(description = "식품 설명", example = "개봉하지 않은 저지방 우유")

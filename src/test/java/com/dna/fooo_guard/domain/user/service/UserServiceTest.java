@@ -43,7 +43,7 @@ public class UserServiceTest {
     private PostRepository postRepository;
     @Mock
     private CommentRepository commentRepository;
-    @InjectMocks/
+    @InjectMocks
     private UserService userService;
 
     @Nested
@@ -57,7 +57,7 @@ public class UserServiceTest {
             User fakeUser = User.builder()
                     .id(1L)
                     .username("testUser")
-                    .password("password123!")
+                    .password("encodedPassword")
                     .build();
 
             given(userRepository.findById(fakeUser.getId())).willReturn(Optional.of(fakeUser));
@@ -66,6 +66,8 @@ public class UserServiceTest {
             UserResponse response = userService.findUserById(fakeUser.getId());
 
             // ------------------ [THEN] ------------------
+            verify(userRepository).findById(fakeUser.getId());
+
             assertThat(response.getUsername()).isEqualTo("testUser");
         }
 
@@ -82,7 +84,6 @@ public class UserServiceTest {
             Post fakePost = Post.builder().id(100L).title("테스트 글").build();
             given(postRepository.findAllByUserId(userId)).willReturn(List.of(fakePost));
 
-            // 포스트에 달린 댓글
             Comment fakePostComment = mock(Comment.class);
             given(commentRepository.findAllByPostId(fakePost.getId())).willReturn(List.of(fakePostComment));
 
@@ -90,13 +91,16 @@ public class UserServiceTest {
             userService.deleteUser(userId);
 
             // ------------------ [THEN] ------------------
-            // 소프트 딜리트
-            verify(fakeComment, times(1)).delete(); // 유저가 직접 쓴 댓글 소프트 삭제 확인
-            verify(fakePostComment, times(1)).delete(); // 유저가 쓴 글에 달린 댓글 소프트 삭제 확인
+            // 조회 검증
+            verify(userRepository).existsById(userId);
+            verify(commentRepository).findAllByUserId(userId);
+            verify(postRepository).findAllByUserId(userId);
+            verify(commentRepository).findAllByPostId(fakePost.getId());
 
-            // 하드 딜리트
+            // delete 검증
+            verify(fakeComment, times(1)).delete(); 
+            verify(fakePostComment, times(1)).delete(); 
             verify(postRepository, times(1)).delete(fakePost);
-
             verify(userGroupRepository, times(1)).deleteAllByUserId(userId);
             verify(foodRepository, times(1)).deleteAllByUserId(userId);
             verify(userRepository, times(1)).deleteById(userId);
@@ -116,6 +120,9 @@ public class UserServiceTest {
 
             // ------------------ [WHEN & THEN] ------------------
             Throwable thrown = catchThrowable(() -> userService.findUserById(wrongId));
+            
+            verify(userRepository).findById(wrongId);
+
             assertThat(thrown)
                     .isInstanceOf(CustomException.class)
                     .satisfies(exception -> {
@@ -133,6 +140,9 @@ public class UserServiceTest {
 
             // ------------------ [WHEN & THEN] ------------------
             Throwable thrown = catchThrowable(() -> userService.deleteUser(wrongId));
+            
+            verify(userRepository).existsById(wrongId);
+            
             assertThat(thrown)
                     .isInstanceOf(CustomException.class)
                     .satisfies(exception -> {
@@ -141,5 +151,4 @@ public class UserServiceTest {
                     });
         }
     }
-
 }
