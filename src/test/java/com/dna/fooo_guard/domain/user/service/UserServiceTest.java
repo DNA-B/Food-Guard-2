@@ -57,7 +57,7 @@ public class UserServiceTest {
             User fakeUser = User.builder()
                     .id(1L)
                     .username("testUser")
-                    .password("encodedPassword")
+                    .nickname("Test User")
                     .build();
 
             given(userRepository.findById(fakeUser.getId())).willReturn(Optional.of(fakeUser));
@@ -67,8 +67,10 @@ public class UserServiceTest {
 
             // ------------------ [THEN] ------------------
             verify(userRepository).findById(fakeUser.getId());
-
-            assertThat(response.getUsername()).isEqualTo("testUser");
+            assertThat(response)
+                    .usingRecursiveComparison()
+                    .comparingOnlyFields("username", "nickname")
+                    .isEqualTo(fakeUser);
         }
 
         @Test
@@ -98,8 +100,8 @@ public class UserServiceTest {
             verify(commentRepository).findAllByPostId(fakePost.getId());
 
             // delete 검증
-            verify(fakeComment, times(1)).delete(); 
-            verify(fakePostComment, times(1)).delete(); 
+            verify(fakeComment, times(1)).delete();
+            verify(fakePostComment, times(1)).delete();
             verify(postRepository, times(1)).delete(fakePost);
             verify(userGroupRepository, times(1)).deleteAllByUserId(userId);
             verify(foodRepository, times(1)).deleteAllByUserId(userId);
@@ -120,9 +122,7 @@ public class UserServiceTest {
 
             // ------------------ [WHEN & THEN] ------------------
             Throwable thrown = catchThrowable(() -> userService.findUserById(wrongId));
-            
             verify(userRepository).findById(wrongId);
-
             assertThat(thrown)
                     .isInstanceOf(CustomException.class)
                     .satisfies(exception -> {
@@ -140,9 +140,7 @@ public class UserServiceTest {
 
             // ------------------ [WHEN & THEN] ------------------
             Throwable thrown = catchThrowable(() -> userService.deleteUser(wrongId));
-            
             verify(userRepository).existsById(wrongId);
-            
             assertThat(thrown)
                     .isInstanceOf(CustomException.class)
                     .satisfies(exception -> {
