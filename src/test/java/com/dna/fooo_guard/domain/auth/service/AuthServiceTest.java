@@ -88,7 +88,7 @@ class AuthServiceTest {
                         User fakeUser = User.builder()
                                         .id(1L)
                                         .username("testUser")
-                                        .password("encodedPassword") 
+                                        .password("encodedPassword")
                                         .build();
 
                         given(userRepository.findByUsername(dto.getUsername())).willReturn(Optional.of(fakeUser));
@@ -125,9 +125,7 @@ class AuthServiceTest {
 
                         // ------------------ [WHEN & THEN] ------------------
                         Throwable thrown = catchThrowable(() -> authService.signUp(dto));
-                        
                         verify(userRepository).existsByUsername(dto.getUsername());
-
                         assertThat(thrown)
                                         .isInstanceOf(CustomException.class)
                                         .satisfies(exception -> {
@@ -152,10 +150,8 @@ class AuthServiceTest {
 
                         // ------------------ [WHEN & THEN] ------------------
                         Throwable thrown = catchThrowable(() -> authService.signUp(dto));
-                        
                         verify(userRepository).existsByUsername(dto.getUsername());
                         verify(userRepository).existsByNickname(dto.getNickname());
-
                         assertThat(thrown)
                                         .isInstanceOf(CustomException.class)
                                         .satisfies(exception -> {
@@ -178,9 +174,7 @@ class AuthServiceTest {
 
                         // ------------------ [WHEN & THEN] ------------------
                         Throwable thrown = catchThrowable(() -> authService.login(dto));
-                        
                         verify(userRepository).findByUsername(dto.getUsername());
-
                         assertThat(thrown)
                                         .isInstanceOf(CustomException.class)
                                         .satisfies(exception -> {
@@ -201,7 +195,7 @@ class AuthServiceTest {
                         User fakeUser = User.builder()
                                         .id(1L)
                                         .username("testUser")
-                                        .password("encodedPassword") 
+                                        .password("encodedPassword")
                                         .build();
 
                         given(userRepository.findByUsername(dto.getUsername())).willReturn(Optional.of(fakeUser));
@@ -209,10 +203,8 @@ class AuthServiceTest {
 
                         // ------------------ [WHEN & THEN] ------------------
                         Throwable thrown = catchThrowable(() -> authService.login(dto));
-                        
                         verify(userRepository).findByUsername(dto.getUsername());
                         verify(passwordEncoder).matches(dto.getPassword(), fakeUser.getPassword());
-
                         assertThat(thrown)
                                         .isInstanceOf(CustomException.class)
                                         .satisfies(exception -> {
