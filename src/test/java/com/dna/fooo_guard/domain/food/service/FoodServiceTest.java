@@ -267,7 +267,7 @@ public class FoodServiceTest {
                                         .description("아침 사과")
                                         .expiryAt(LocalDate.of(2026, 12, 31))
                                         .user(fakeUser)
-                                        .group(fakeGroup) 
+                                        .group(fakeGroup)
                                         .build();
 
                         FoodEditRequest request = FoodEditRequest.builder()
@@ -293,18 +293,18 @@ public class FoodServiceTest {
                                         .comparingOnlyFields("name", "type", "description", "expiryAt")
                                         .isEqualTo(request);
 
-                        assertThat(originFood.getGroup()).isNull(); 
+                        assertThat(originFood.getGroup()).isNull();
                 }
-                
+
                 @Test
                 @DisplayName("음식 삭제 성공")
                 void deleteFood_Success() {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).build(); 
+                        User fakeUser = User.builder().id(userId).build();
 
                         Long foodId = 100L;
-                        Food fakeFood = Food.builder().id(foodId).user(fakeUser).build(); 
+                        Food fakeFood = Food.builder().id(foodId).user(fakeUser).build();
 
                         given(foodRepository.findById(foodId)).willReturn(Optional.of(fakeFood));
 
@@ -401,7 +401,8 @@ public class FoodServiceTest {
                                         .isInstanceOf(CustomException.class)
                                         .satisfies(exception -> {
                                                 CustomException customEx = (CustomException) exception;
-                                                assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.CANNOT_DELETE_DONATED_FOOD);
+                                                assertThat(customEx.getErrorCode())
+                                                                .isEqualTo(ErrorCode.CANNOT_DELETE_DONATED_FOOD);
                                         });
                 }
         }
