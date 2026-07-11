@@ -73,7 +73,7 @@ public class PostService {
     public void deletePost(Long postId, Long userId) {
         Post post = getPostWithAccessCheck(postId, userId);
 
-        // TODO: 추후 QueryDSL 도입 시 벌크 업데이트 연산으로 마이그레이션 예정
+        // TODO: 추후 QueryDSL 도입 시 벌크 업데이트 연산으로 마이그레이션 예정 (게시물이 삭제되면 댓글은 hard ddelete, user에서는 soft delete)
         List<Comment> comments = commentRepository.findAllByPostId(postId);
         for (Comment comment : comments) {
             comment.delete();

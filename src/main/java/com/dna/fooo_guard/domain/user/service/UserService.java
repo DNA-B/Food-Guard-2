@@ -60,7 +60,7 @@ public class UserService {
 
         List<Comment> userComments = commentRepository.findAllByUserId(id);
         for (Comment comment : userComments) {
-            comment.delete();
+            comment.delete(); // 유저가 삭제되어도 댓글은 "탈퇴한 사용자"로 나와야 함.
         }
 
         List<Post> userPosts = postRepository.findAllByUserId(id);

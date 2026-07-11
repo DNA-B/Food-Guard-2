@@ -33,120 +33,118 @@ import com.dna.fooo_guard.global.error.ErrorCode;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private UserGroupRepository userGroupRepository;
-    @Mock
-    private FoodRepository foodRepository;
-    @Mock
-    private PostRepository postRepository;
-    @Mock
-    private CommentRepository commentRepository;
-    @InjectMocks
-    private UserService userService;
+        @Mock
+        private UserRepository userRepository;
+        @Mock
+        private UserGroupRepository userGroupRepository;
+        @Mock
+        private FoodRepository foodRepository;
+        @Mock
+        private PostRepository postRepository;
+        @Mock
+        private CommentRepository commentRepository;
+        @InjectMocks
+        private UserService userService;
 
-    @Nested
-    @DisplayName("성공 케이스")
-    class Success {
+        @Nested
+        @DisplayName("성공 케이스")
+        class Success {
 
-        @Test
-        @DisplayName("유저 조회 성공")
-        void findUserById_Success() {
-            // ------------------ [GIVEN] ------------------
-            User fakeUser = User.builder()
-                    .id(1L)
-                    .username("testUser")
-                    .nickname("Test User")
-                    .build();
+                @Test
+                @DisplayName("유저 조회 성공")
+                void findUserById_Success() {
+                        // ------------------ [GIVEN] ------------------
+                        User fakeUser = User.builder()
+                                        .id(1L)
+                                        .username("testUser")
+                                        .nickname("Test User")
+                                        .build();
 
-            given(userRepository.findById(fakeUser.getId())).willReturn(Optional.of(fakeUser));
+                        given(userRepository.findById(fakeUser.getId())).willReturn(Optional.of(fakeUser));
 
-            // ------------------ [WHEN] ------------------
-            UserResponse response = userService.findUserById(fakeUser.getId());
+                        // ------------------ [WHEN] ------------------
+                        UserResponse response = userService.findUserById(fakeUser.getId());
 
-            // ------------------ [THEN] ------------------
-            verify(userRepository).findById(fakeUser.getId());
-            assertThat(response)
-                    .usingRecursiveComparison()
-                    .comparingOnlyFields("username", "nickname")
-                    .isEqualTo(fakeUser);
+                        // ------------------ [THEN] ------------------
+                        verify(userRepository).findById(fakeUser.getId());
+                        assertThat(response)
+                                        .usingRecursiveComparison()
+                                        .comparingOnlyFields("username", "nickname")
+                                        .isEqualTo(fakeUser);
+                }
+
+                @Test
+                @DisplayName("유저 탈퇴 성공 - 댓글(소프트) 및 게시글(하드) 연쇄 삭제 루프 검증")
+                void deleteUser_Success_WithCommentsAndPosts() {
+                        // ------------------ [GIVEN] ------------------
+                        Long userId = 1L;
+                        given(userRepository.existsById(userId)).willReturn(true);
+
+                        Comment fakeComment = mock(Comment.class);
+                        given(commentRepository.findAllByUserId(userId)).willReturn(List.of(fakeComment));
+
+                        Post fakePost = Post.builder().id(100L).title("테스트 글").build();
+                        given(postRepository.findAllByUserId(userId)).willReturn(List.of(fakePost));
+
+                        Comment fakePostComment = mock(Comment.class);
+                        given(commentRepository.findAllByPostId(fakePost.getId())).willReturn(List.of(fakePostComment));
+
+                        // ------------------ [WHEN] ------------------
+                        userService.deleteUser(userId);
+
+                        // ------------------ [THEN] ------------------
+                        verify(userRepository).existsById(userId);
+                        verify(commentRepository).findAllByUserId(userId);
+                        verify(postRepository).findAllByUserId(userId);
+                        verify(commentRepository).findAllByPostId(fakePost.getId());
+
+                        verify(fakeComment, times(1)).delete();
+                        verify(fakePostComment, times(1)).delete();
+                        verify(postRepository, times(1)).delete(fakePost);
+                        verify(userGroupRepository, times(1)).deleteAllByUserId(userId);
+                        verify(foodRepository, times(1)).deleteAllByUserId(userId);
+                        verify(userRepository, times(1)).deleteById(userId);
+                }
         }
 
-        @Test
-        @DisplayName("유저 탈퇴 성공 - 댓글(소프트) 및 게시글(하드) 연쇄 삭제 루프 검증")
-        void deleteUser_Success_WithCommentsAndPosts() {
-            // ------------------ [GIVEN] ------------------
-            Long userId = 1L;
-            given(userRepository.existsById(userId)).willReturn(true);
+        @Nested
+        @DisplayName("실패 케이스")
+        class Failure {
 
-            Comment fakeComment = mock(Comment.class);
-            given(commentRepository.findAllByUserId(userId)).willReturn(List.of(fakeComment));
+                @Test
+                @DisplayName("유저 조회 실패 - 존재하지 않는 유저")
+                void findUserById_Fail() {
+                        // ------------------ [GIVEN] ------------------
+                        Long wrongId = 999999L;
+                        given(userRepository.findById(wrongId)).willReturn(Optional.empty());
 
-            Post fakePost = Post.builder().id(100L).title("테스트 글").build();
-            given(postRepository.findAllByUserId(userId)).willReturn(List.of(fakePost));
+                        // ------------------ [WHEN & THEN] ------------------
+                        Throwable thrown = catchThrowable(() -> userService.findUserById(wrongId));
+                        verify(userRepository).findById(wrongId);
+                        assertThat(thrown)
+                                        .isInstanceOf(CustomException.class)
+                                        .satisfies(exception -> {
+                                                CustomException customEx = (CustomException) exception;
+                                                assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
+                                        });
+                }
 
-            Comment fakePostComment = mock(Comment.class);
-            given(commentRepository.findAllByPostId(fakePost.getId())).willReturn(List.of(fakePostComment));
+                @Test
+                @DisplayName("유저 삭제 실패 - 존재하지 않는 유저")
+                void deleteUser_Fail() {
+                        // ------------------ [GIVEN] ------------------
+                        Long wrongId = 999999L;
+                        given(userRepository.existsById(wrongId)).willReturn(false);
 
-            // ------------------ [WHEN] ------------------
-            userService.deleteUser(userId);
-
-            // ------------------ [THEN] ------------------
-            // 조회 검증
-            verify(userRepository).existsById(userId);
-            verify(commentRepository).findAllByUserId(userId);
-            verify(postRepository).findAllByUserId(userId);
-            verify(commentRepository).findAllByPostId(fakePost.getId());
-
-            // delete 검증
-            verify(fakeComment, times(1)).delete();
-            verify(fakePostComment, times(1)).delete();
-            verify(postRepository, times(1)).delete(fakePost);
-            verify(userGroupRepository, times(1)).deleteAllByUserId(userId);
-            verify(foodRepository, times(1)).deleteAllByUserId(userId);
-            verify(userRepository, times(1)).deleteById(userId);
+                        // ------------------ [WHEN & THEN] ------------------
+                        Throwable thrown = catchThrowable(() -> userService.deleteUser(wrongId));
+                        verify(userRepository).existsById(wrongId);
+                        assertThat(thrown)
+                                        .isInstanceOf(CustomException.class)
+                                        .satisfies(exception -> {
+                                                CustomException customEx = (CustomException) exception;
+                                                assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
+                                        });
+                }
         }
-    }
-
-    @Nested
-    @DisplayName("실패 케이스")
-    class Failure {
-
-        @Test
-        @DisplayName("유저 조회 실패 - 존재하지 않는 유저")
-        void findUserById_Fail() {
-            // ------------------ [GIVEN] ------------------
-            Long wrongId = 999999L;
-            given(userRepository.findById(wrongId)).willReturn(Optional.empty());
-
-            // ------------------ [WHEN & THEN] ------------------
-            Throwable thrown = catchThrowable(() -> userService.findUserById(wrongId));
-            verify(userRepository).findById(wrongId);
-            assertThat(thrown)
-                    .isInstanceOf(CustomException.class)
-                    .satisfies(exception -> {
-                        CustomException customEx = (CustomException) exception;
-                        assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
-                    });
-        }
-
-        @Test
-        @DisplayName("유저 삭제 실패 - 존재하지 않는 유저")
-        void deleteUser_Fail() {
-            // ------------------ [GIVEN] ------------------
-            Long wrongId = 999999L;
-            given(userRepository.existsById(wrongId)).willReturn(false);
-
-            // ------------------ [WHEN & THEN] ------------------
-            Throwable thrown = catchThrowable(() -> userService.deleteUser(wrongId));
-            verify(userRepository).existsById(wrongId);
-            assertThat(thrown)
-                    .isInstanceOf(CustomException.class)
-                    .satisfies(exception -> {
-                        CustomException customEx = (CustomException) exception;
-                        assertThat(customEx.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
-                    });
-        }
-    }
 }
