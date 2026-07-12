@@ -43,6 +43,9 @@ public class ChatService {
                         throw new CustomException(ErrorCode.CANNOT_CHAT_WITH_SELF);
                 }
 
+                // ✨ [2번 규칙 보장]: donationId와 guestId 쌍으로 조회하므로,
+                // 새로운 guestId(예: 3번 유저)가 들어오면 기존 1번 방을 타지 않고 반드시 orElseGet으로 새 방을 생성합니다[cite:
+                // 4].
                 return chatRoomRepository.findByDonationIdAndGuestId(donationId, guestId)
                                 .map(room -> room.getId())
                                 .orElseGet(() -> {
@@ -63,9 +66,13 @@ public class ChatService {
                 User sender = userRepository.findById(messageDto.getSenderId())
                                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+                if (!chatRoom.getHost().getId().equals(sender.getId()) &&
+                                !chatRoom.getGuest().getId().equals(sender.getId())) {
+                        throw new CustomException(ErrorCode.UNAUTHORIZED_CHAT_ACCESS);
+                }
+
                 String finalMessage = messageDto.getMessage();
 
-                // 입장 메시지일 경우
                 if (ChatMessageDto.MessageType.ENTER.equals(messageDto.getType())) {
                         finalMessage = sender.getNickname() + "님이 입장하셨습니다.";
                 }

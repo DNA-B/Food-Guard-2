@@ -60,6 +60,7 @@ public enum ErrorCode {
     // Chat Errors
     CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 채팅방을 찾을 수 없습니다."),
     CANNOT_CHAT_WITH_SELF(HttpStatus.BAD_REQUEST, "자신의 나눔글에는 채팅을 시작할 수 없습니다."),
+    UNAUTHORIZED_CHAT_ACCESS(HttpStatus.FORBIDDEN, "채팅방 참여자가 아닙니다."),
     CHAT_ROOM_CLOSED(HttpStatus.BAD_REQUEST, "종료된 채팅방에는 메시지를 보낼 수 없습니다.");
 
     private final HttpStatus status;
