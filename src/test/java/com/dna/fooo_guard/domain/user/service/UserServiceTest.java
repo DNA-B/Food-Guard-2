@@ -46,6 +46,23 @@ public class UserServiceTest {
         @InjectMocks
         private UserService userService;
 
+        // ------------------ [HELPERS] ------------------
+
+        private static User createUser(Long userId) {
+                return User.builder()
+                                .id(userId)
+                                .username("testUser")
+                                .nickname("Test User")
+                                .build();
+        }
+
+        private static Post createPost(Long postId) {
+                return Post.builder()
+                                .id(postId)
+                                .title("테스트 글")
+                                .build();
+        }
+
         @Nested
         @DisplayName("성공 케이스")
         class Success {
@@ -54,19 +71,16 @@ public class UserServiceTest {
                 @DisplayName("유저 조회 성공")
                 void findUserById_Success() {
                         // ------------------ [GIVEN] ------------------
-                        User fakeUser = User.builder()
-                                        .id(1L)
-                                        .username("testUser")
-                                        .nickname("Test User")
-                                        .build();
+                        Long userId = 1L;
+                        User fakeUser = createUser(userId);
 
-                        given(userRepository.findById(fakeUser.getId())).willReturn(Optional.of(fakeUser));
+                        given(userRepository.findById(userId)).willReturn(Optional.of(fakeUser));
 
                         // ------------------ [WHEN] ------------------
-                        UserResponse response = userService.findUserById(fakeUser.getId());
+                        UserResponse response = userService.findUserById(userId);
 
                         // ------------------ [THEN] ------------------
-                        verify(userRepository).findById(fakeUser.getId());
+                        verify(userRepository).findById(userId);
                         assertThat(response)
                                         .usingRecursiveComparison()
                                         .comparingOnlyFields("username", "nickname")
@@ -83,7 +97,8 @@ public class UserServiceTest {
                         Comment fakeComment = mock(Comment.class);
                         given(commentRepository.findAllByUserId(userId)).willReturn(List.of(fakeComment));
 
-                        Post fakePost = Post.builder().id(100L).title("테스트 글").build();
+                        Long postId = 100L;
+                        Post fakePost = createPost(postId);
                         given(postRepository.findAllByUserId(userId)).willReturn(List.of(fakePost));
 
                         Comment fakePostComment = mock(Comment.class);

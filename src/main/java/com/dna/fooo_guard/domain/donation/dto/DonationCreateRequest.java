@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "나눔 등록 요청")
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class DonationCreateRequest {
 
