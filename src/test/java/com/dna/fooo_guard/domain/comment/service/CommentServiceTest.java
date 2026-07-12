@@ -43,6 +43,40 @@ public class CommentServiceTest {
         @InjectMocks
         private CommentService commentService;
 
+        // ------------------ [HELPERS] ------------------
+
+        private static User createUser(Long userId) {
+                return User.builder().id(userId).build();
+        }
+
+        private static Post createPost(Long postId) {
+                return Post.builder().id(postId).build();
+        }
+
+        private static CommentCreateRequest createCommentCreateRequest(String content, Long parentId) {
+                return CommentCreateRequest.builder()
+                                .content(content)
+                                .parentId(parentId)
+                                .build();
+        }
+
+        private static CommentEditRequest createCommentEditRequest(String content) {
+                return CommentEditRequest.builder()
+                                .content(content)
+                                .build();
+        }
+
+        private static Comment createComment(Long commentId, Post post, CommentStatus status, Comment parent,
+                        User user) {
+                return Comment.builder()
+                                .id(commentId)
+                                .post(post)
+                                .status(status)
+                                .parent(parent)
+                                .user(user)
+                                .build();
+        }
+
         @Nested
         @DisplayName("성공 케이스")
         class Success {
@@ -53,13 +87,10 @@ public class CommentServiceTest {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
                         Long postId = 100L;
-                        User fakeUser = User.builder().id(userId).build();
-                        Post fakePost = Post.builder().id(postId).build();
+                        User fakeUser = createUser(userId);
+                        Post fakePost = createPost(postId);
 
-                        CommentCreateRequest request = CommentCreateRequest.builder()
-                                        .content("새로운 부모 댓글입니다.")
-                                        .parentId(null)
-                                        .build();
+                        CommentCreateRequest request = createCommentCreateRequest("새로운 부모 댓글입니다.", null);
 
                         given(userRepository.getReferenceById(userId)).willReturn(fakeUser);
                         given(postRepository.findById(postId)).willReturn(Optional.of(fakePost));
@@ -86,20 +117,12 @@ public class CommentServiceTest {
                         Long userId = 1L;
                         Long postId = 100L;
                         Long parentId = 10L;
-                        User fakeUser = User.builder().id(userId).build();
-                        Post fakePost = Post.builder().id(postId).build();
+                        User fakeUser = createUser(userId);
+                        Post fakePost = createPost(postId);
 
-                        Comment fakeParent = Comment.builder()
-                                        .id(parentId)
-                                        .post(fakePost)
-                                        .status(CommentStatus.PUBLISHED)
-                                        .parent(null)
-                                        .build();
+                        Comment fakeParent = createComment(parentId, fakePost, CommentStatus.PUBLISHED, null, null);
 
-                        CommentCreateRequest request = CommentCreateRequest.builder()
-                                        .content("대댓글입니다.")
-                                        .parentId(parentId)
-                                        .build();
+                        CommentCreateRequest request = createCommentCreateRequest("대댓글입니다.", parentId);
 
                         given(userRepository.getReferenceById(userId)).willReturn(fakeUser);
                         given(postRepository.findById(postId)).willReturn(Optional.of(fakePost));
@@ -124,21 +147,15 @@ public class CommentServiceTest {
                         Long postId = 100L;
                         Long grandParentId = 9L;
                         Long parentId = 10L;
-                        User fakeUser = User.builder().id(userId).build();
-                        Post fakePost = Post.builder().id(postId).build();
+                        User fakeUser = createUser(userId);
+                        Post fakePost = createPost(postId);
 
-                        Comment grandParent = Comment.builder().id(grandParentId).post(fakePost).build();
-                        Comment fakeParent = Comment.builder()
-                                        .id(parentId)
-                                        .post(fakePost)
-                                        .status(CommentStatus.PUBLISHED)
-                                        .parent(grandParent)
-                                        .build();
+                        Comment grandParent = createComment(grandParentId, fakePost, null, null, null);
+                        Comment fakeParent = createComment(parentId, fakePost, CommentStatus.PUBLISHED, grandParent,
+                                        null);
 
-                        CommentCreateRequest request = CommentCreateRequest.builder()
-                                        .content("3단계가 아니라 2단계로 평탄화될 대댓글")
-                                        .parentId(parentId)
-                                        .build();
+                        CommentCreateRequest request = createCommentCreateRequest("3단계가 아니라 2단계로 평탄화될 대댓글",
+                                        parentId);
 
                         given(userRepository.getReferenceById(userId)).willReturn(fakeUser);
                         given(postRepository.findById(postId)).willReturn(Optional.of(fakePost));
@@ -161,17 +178,9 @@ public class CommentServiceTest {
                         // ------------------ [GIVEN] ------------------
                         Long postId = 100L;
 
-                        Comment rootComment = Comment.builder()
-                                        .id(1L)
-                                        .content("부모 댓글")
-                                        .parent(null)
-                                        .build();
+                        Comment rootComment = Comment.builder().id(1L).content("부모 댓글").parent(null).build();
 
-                        Comment childComment = Comment.builder()
-                                        .id(2L)
-                                        .content("대댓글")
-                                        .parent(rootComment)
-                                        .build();
+                        Comment childComment = Comment.builder().id(2L).content("대댓글").parent(rootComment).build();
 
                         given(commentRepository.findAllByPostIdWithParent(postId))
                                         .willReturn(List.of(rootComment, childComment));
@@ -199,7 +208,7 @@ public class CommentServiceTest {
                         // ------------------ [GIVEN] ------------------
                         Long commentId = 10L;
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).build();
+                        User fakeUser = createUser(userId);
 
                         Comment originComment = Comment.builder()
                                         .id(commentId)
@@ -208,9 +217,7 @@ public class CommentServiceTest {
                                         .user(fakeUser)
                                         .build();
 
-                        CommentEditRequest request = CommentEditRequest.builder()
-                                        .content("수정하고 싶은 댓글 내용")
-                                        .build();
+                        CommentEditRequest request = createCommentEditRequest("수정하고 싶은 댓글 내용");
 
                         given(commentRepository.findById(commentId)).willReturn(Optional.of(originComment));
 
@@ -230,13 +237,9 @@ public class CommentServiceTest {
                         // ------------------ [GIVEN] ------------------
                         Long commentId = 10L;
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).build();
+                        User fakeUser = createUser(userId);
 
-                        Comment originComment = Comment.builder()
-                                        .id(commentId)
-                                        .status(CommentStatus.PUBLISHED)
-                                        .user(fakeUser)
-                                        .build();
+                        Comment originComment = createComment(commentId, null, CommentStatus.PUBLISHED, null, fakeUser);
 
                         given(commentRepository.findById(commentId)).willReturn(Optional.of(originComment));
 
@@ -259,7 +262,7 @@ public class CommentServiceTest {
                         // ------------------ [GIVEN] ------------------
                         Long wrongPostId = 999L;
                         Long userId = 1L;
-                        CommentCreateRequest request = CommentCreateRequest.builder().content("내용").build();
+                        CommentCreateRequest request = createCommentCreateRequest("내용", null);
 
                         given(postRepository.findById(wrongPostId)).willReturn(Optional.empty());
 
@@ -280,12 +283,9 @@ public class CommentServiceTest {
                         Long postId = 100L;
                         Long wrongParentId = 999L;
                         Long userId = 1L;
-                        Post fakePost = Post.builder().id(postId).build();
+                        Post fakePost = createPost(postId);
 
-                        CommentCreateRequest request = CommentCreateRequest.builder()
-                                        .content("대댓글")
-                                        .parentId(wrongParentId)
-                                        .build();
+                        CommentCreateRequest request = createCommentCreateRequest("대댓글", wrongParentId);
 
                         given(postRepository.findById(postId)).willReturn(Optional.of(fakePost));
                         given(commentRepository.findById(wrongParentId)).willReturn(Optional.empty());
@@ -308,14 +308,11 @@ public class CommentServiceTest {
                         Long parentId = 10L;
                         Long userId = 1L;
 
-                        Post fakePost = Post.builder().id(postId).build();
-                        Post otherPost = Post.builder().id(otherPostId).build();
-                        Comment fakeParent = Comment.builder().id(parentId).post(otherPost).build();
+                        Post fakePost = createPost(postId);
+                        Post otherPost = createPost(otherPostId);
+                        Comment fakeParent = createComment(parentId, otherPost, null, null, null);
 
-                        CommentCreateRequest request = CommentCreateRequest.builder()
-                                        .content("대댓글")
-                                        .parentId(parentId)
-                                        .build();
+                        CommentCreateRequest request = createCommentCreateRequest("대댓글", parentId);
 
                         given(postRepository.findById(postId)).willReturn(Optional.of(fakePost));
                         given(commentRepository.findById(parentId)).willReturn(Optional.of(fakeParent));
@@ -337,17 +334,10 @@ public class CommentServiceTest {
                         Long parentId = 10L;
                         Long userId = 1L;
 
-                        Post fakePost = Post.builder().id(postId).build();
-                        Comment fakeParent = Comment.builder()
-                                        .id(parentId)
-                                        .post(fakePost)
-                                        .status(CommentStatus.DELETED)
-                                        .build();
+                        Post fakePost = createPost(postId);
+                        Comment fakeParent = createComment(parentId, fakePost, CommentStatus.DELETED, null, null);
 
-                        CommentCreateRequest request = CommentCreateRequest.builder()
-                                        .content("대댓글")
-                                        .parentId(parentId)
-                                        .build();
+                        CommentCreateRequest request = createCommentCreateRequest("대댓글", parentId);
 
                         given(postRepository.findById(postId)).willReturn(Optional.of(fakePost));
                         given(commentRepository.findById(parentId)).willReturn(Optional.of(fakeParent));
@@ -369,8 +359,8 @@ public class CommentServiceTest {
                         Long ownerId = 1L;
                         Long wrongId = 2L;
 
-                        User commentOwner = User.builder().id(ownerId).build();
-                        Comment fakeComment = Comment.builder().id(commentId).user(commentOwner).build();
+                        User commentOwner = createUser(ownerId);
+                        Comment fakeComment = createComment(commentId, null, null, null, commentOwner);
 
                         given(commentRepository.findById(commentId)).willReturn(Optional.of(fakeComment));
 

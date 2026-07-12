@@ -45,6 +45,56 @@ public class FoodServiceTest {
         @InjectMocks
         private FoodService foodService;
 
+        // ------------------ [HELPERS] ------------------
+
+        private static User createUser(Long userId) {
+                return User.builder()
+                                .id(userId)
+                                .username("testUser")
+                                .build();
+        }
+
+        private static Group createGroup(Long groupId) {
+                return Group.builder()
+                                .id(groupId)
+                                .name("testGroup")
+                                .build();
+        }
+
+        private static FoodCreateRequest createFoodCreateRequest(Long groupId) {
+                return FoodCreateRequest.builder()
+                                .name("포테이토 피자")
+                                .type("피자")
+                                .description("맛있는 포테이토 피자")
+                                .expiryAt(LocalDate.of(2026, 12, 31))
+                                .groupId(groupId)
+                                .build();
+        }
+
+        private static FoodEditRequest createFoodEditRequest(Long groupId) {
+                return FoodEditRequest.builder()
+                                .name("바나나")
+                                .type("과일")
+                                .description("아침 바나나")
+                                .expiryAt(LocalDate.of(2026, 11, 30))
+                                .groupId(groupId)
+                                .build();
+        }
+
+        private static Food createFood(Long foodId, String name, String type, String description, LocalDate expiryAt,
+                        User user, Group group, FoodStatus status) {
+                return Food.builder()
+                                .id(foodId)
+                                .name(name)
+                                .type(type)
+                                .description(description)
+                                .expiryAt(expiryAt)
+                                .user(user)
+                                .group(group)
+                                .status(status)
+                                .build();
+        }
+
         @Nested
         @DisplayName("성공 케이스")
         class Success {
@@ -54,15 +104,9 @@ public class FoodServiceTest {
                 void createFood_Success_WithoutGroup() {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).username("testUser").build();
+                        User fakeUser = createUser(userId);
 
-                        FoodCreateRequest request = FoodCreateRequest.builder()
-                                        .name("포테이토 피자")
-                                        .type("피자")
-                                        .description("맛있는 포테이토 피자")
-                                        .expiryAt(LocalDate.of(2026, 12, 31))
-                                        .groupId(null)
-                                        .build();
+                        FoodCreateRequest request = createFoodCreateRequest(null);
 
                         given(userRepository.getReferenceById(userId)).willReturn(fakeUser);
 
@@ -93,16 +137,10 @@ public class FoodServiceTest {
                         Long userId = 1L;
                         Long groupId = 10L;
 
-                        User fakeUser = User.builder().id(userId).username("testUser").build();
-                        Group fakeGroup = Group.builder().id(groupId).name("testGroup").build();
+                        User fakeUser = createUser(userId);
+                        Group fakeGroup = createGroup(groupId);
 
-                        FoodCreateRequest request = FoodCreateRequest.builder()
-                                        .name("포테이토 피자")
-                                        .type("피자")
-                                        .description("맛있는 포테이토 피자")
-                                        .expiryAt(LocalDate.of(2026, 12, 31))
-                                        .groupId(groupId)
-                                        .build();
+                        FoodCreateRequest request = createFoodCreateRequest(groupId);
 
                         given(userRepository.getReferenceById(userId)).willReturn(fakeUser);
                         given(groupRepository.getReferenceById(groupId)).willReturn(fakeGroup);
@@ -132,25 +170,13 @@ public class FoodServiceTest {
                 void findAllFoodByUserId_Success() {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).username("testUser").build();
+                        User fakeUser = createUser(userId);
 
-                        Food food1 = Food.builder()
-                                        .id(100L)
-                                        .name("사과")
-                                        .type("과일")
-                                        .description("아침 사과")
-                                        .expiryAt(LocalDate.of(2026, 12, 31))
-                                        .user(fakeUser)
-                                        .build();
+                        Food food1 = createFood(100L, "사과", "과일", "아침 사과", LocalDate.of(2026, 12, 31), fakeUser,
+                                        null, null);
 
-                        Food food2 = Food.builder()
-                                        .id(200L)
-                                        .name("우유")
-                                        .type("유제품")
-                                        .description("신선한 우유")
-                                        .expiryAt(LocalDate.of(2026, 7, 10))
-                                        .user(fakeUser)
-                                        .build();
+                        Food food2 = createFood(200L, "우유", "유제품", "신선한 우유", LocalDate.of(2026, 7, 10), fakeUser,
+                                        null, null);
 
                         List<Food> fakeFoods = List.of(food1, food2);
 
@@ -175,17 +201,11 @@ public class FoodServiceTest {
                 void findFoodById_Success() {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).username("testUser").build();
+                        User fakeUser = createUser(userId);
 
                         Long foodId = 100L;
-                        Food food1 = Food.builder()
-                                        .id(foodId)
-                                        .name("사과")
-                                        .type("과일")
-                                        .description("아침 사과")
-                                        .expiryAt(LocalDate.of(2026, 12, 31))
-                                        .user(fakeUser)
-                                        .build();
+                        Food food1 = createFood(foodId, "사과", "과일", "아침 사과", LocalDate.of(2026, 12, 31), fakeUser,
+                                        null, null);
 
                         given(foodRepository.findById(foodId)).willReturn(Optional.of(food1));
 
@@ -206,29 +226,16 @@ public class FoodServiceTest {
                 void editFood_Success_GroupChanged() {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).build();
+                        User fakeUser = createUser(userId);
 
                         Long groupId = 1L;
-                        Group fakeGroup = Group.builder().id(groupId).name("testGroup").build();
+                        Group fakeGroup = createGroup(groupId);
 
                         Long foodId = 100L;
-                        Food originFood = Food.builder()
-                                        .id(foodId)
-                                        .name("사과")
-                                        .type("과일")
-                                        .description("아침 사과")
-                                        .expiryAt(LocalDate.of(2026, 12, 31))
-                                        .user(fakeUser)
-                                        .group(null)
-                                        .build();
+                        Food originFood = createFood(foodId, "사과", "과일", "아침 사과", LocalDate.of(2026, 12, 31),
+                                        fakeUser, null, null);
 
-                        FoodEditRequest request = FoodEditRequest.builder()
-                                        .name("바나나")
-                                        .type("과일")
-                                        .description("아침 바나나")
-                                        .expiryAt(LocalDate.of(2026, 11, 30))
-                                        .groupId(groupId)
-                                        .build();
+                        FoodEditRequest request = createFoodEditRequest(groupId);
 
                         given(foodRepository.findById(foodId)).willReturn(Optional.of(originFood));
                         given(groupRepository.getReferenceById(groupId)).willReturn(fakeGroup);
@@ -253,30 +260,17 @@ public class FoodServiceTest {
                 void editFood_Success_ClearGroup() {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).build();
+                        User fakeUser = createUser(userId);
 
                         Long groupId = 1L;
-                        Group fakeGroup = Group.builder().id(groupId).name("testGroup").build();
+                        Group fakeGroup = createGroup(groupId);
                         Group dummyGroup = Group.builder().id(-1L).build();
 
                         Long foodId = 100L;
-                        Food originFood = Food.builder()
-                                        .id(foodId)
-                                        .name("사과")
-                                        .type("과일")
-                                        .description("아침 사과")
-                                        .expiryAt(LocalDate.of(2026, 12, 31))
-                                        .user(fakeUser)
-                                        .group(fakeGroup)
-                                        .build();
+                        Food originFood = createFood(foodId, "사과", "과일", "아침 사과", LocalDate.of(2026, 12, 31),
+                                        fakeUser, fakeGroup, null);
 
-                        FoodEditRequest request = FoodEditRequest.builder()
-                                        .name("바나나")
-                                        .type("과일")
-                                        .description("아침 바나나")
-                                        .expiryAt(LocalDate.of(2026, 11, 30))
-                                        .groupId(-1L)
-                                        .build();
+                        FoodEditRequest request = createFoodEditRequest(-1L);
 
                         given(foodRepository.findById(foodId)).willReturn(Optional.of(originFood));
                         given(groupRepository.getReferenceById(-1L)).willReturn(dummyGroup);
@@ -301,10 +295,10 @@ public class FoodServiceTest {
                 void deleteFood_Success() {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).build();
+                        User fakeUser = createUser(userId);
 
                         Long foodId = 100L;
-                        Food fakeFood = Food.builder().id(foodId).user(fakeUser).build();
+                        Food fakeFood = createFood(foodId, null, null, null, null, fakeUser, null, null);
 
                         given(foodRepository.findById(foodId)).willReturn(Optional.of(fakeFood));
 
@@ -349,17 +343,11 @@ public class FoodServiceTest {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
                         Long wrongUserId = 2L;
-                        User fakeUser = User.builder().id(userId).username("testUser").build();
+                        User fakeUser = createUser(userId);
 
                         Long foodId = 100L;
-                        Food food1 = Food.builder()
-                                        .id(foodId)
-                                        .name("사과")
-                                        .type("과일")
-                                        .description("아침 사과")
-                                        .expiryAt(LocalDate.of(2026, 12, 31))
-                                        .user(fakeUser)
-                                        .build();
+                        Food food1 = createFood(foodId, "사과", "과일", "아침 사과", LocalDate.of(2026, 12, 31), fakeUser,
+                                        null, null);
 
                         given(foodRepository.findById(foodId)).willReturn(Optional.of(food1));
 
@@ -381,14 +369,10 @@ public class FoodServiceTest {
                 void deleteFood_Fail_CannotDeleteDonatedFood() {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).build();
+                        User fakeUser = createUser(userId);
 
                         Long foodId = 100L;
-                        Food fakeFood = Food.builder()
-                                        .id(foodId)
-                                        .user(fakeUser)
-                                        .status(FoodStatus.DONATED)
-                                        .build();
+                        Food fakeFood = createFood(foodId, null, null, null, null, fakeUser, null, FoodStatus.DONATED);
 
                         given(foodRepository.findById(foodId)).willReturn(Optional.of(fakeFood));
 

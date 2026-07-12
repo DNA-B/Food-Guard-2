@@ -44,6 +44,38 @@ public class PostServiceTest {
         @InjectMocks
         private PostService postService;
 
+        // ------------------ [HELPERS] ------------------
+
+        private static User createUser(Long userId) {
+                return User.builder()
+                                .id(userId)
+                                .username("testUser")
+                                .build();
+        }
+
+        private static Post createPost(Long postId, String title, String content, User user) {
+                return Post.builder()
+                                .id(postId)
+                                .title(title)
+                                .content(content)
+                                .user(user)
+                                .build();
+        }
+
+        private static PostCreateRequest createPostCreateRequest() {
+                return PostCreateRequest.builder()
+                                .title("테스트 제목")
+                                .content("테스트 내용")
+                                .build();
+        }
+
+        private static PostEditRequest createPostEditRequest() {
+                return PostEditRequest.builder()
+                                .title("수정된 제목")
+                                .content("수정된 내용")
+                                .build();
+        }
+
         @Nested
         @DisplayName("성공 케이스")
         class Success {
@@ -53,12 +85,9 @@ public class PostServiceTest {
                 void createPost_Success() {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
-                        User fakeUser = User.builder().id(userId).username("testUser").build();
+                        User fakeUser = createUser(userId);
 
-                        PostCreateRequest request = PostCreateRequest.builder()
-                                        .title("테스트 제목")
-                                        .content("테스트 내용")
-                                        .build();
+                        PostCreateRequest request = createPostCreateRequest();
 
                         given(userRepository.getReferenceById(userId)).willReturn(fakeUser);
 
@@ -84,21 +113,11 @@ public class PostServiceTest {
                 @DisplayName("게시글 전체 조회 성공")
                 void findAllPost_Success() {
                         // ------------------ [GIVEN] ------------------
-                        User fakeUser = User.builder().id(1L).username("testUser").build();
+                        User fakeUser = createUser(1L);
 
-                        Post post1 = Post.builder()
-                                        .id(100L)
-                                        .title("첫 번째 게시글")
-                                        .content("내용 1")
-                                        .user(fakeUser)
-                                        .build();
+                        Post post1 = createPost(100L, "첫 번째 게시글", "내용 1", fakeUser);
 
-                        Post post2 = Post.builder()
-                                        .id(200L)
-                                        .title("두 번째 게시글")
-                                        .content("내용 2")
-                                        .user(fakeUser)
-                                        .build();
+                        Post post2 = createPost(200L, "두 번째 게시글", "내용 2", fakeUser);
 
                         List<Post> fakePosts = List.of(post1, post2);
 
@@ -123,14 +142,9 @@ public class PostServiceTest {
                 void findPostById_Success() {
                         // ------------------ [GIVEN] ------------------
                         Long postId = 100L;
-                        User fakeUser = User.builder().id(1L).username("testUser").build();
+                        User fakeUser = createUser(1L);
 
-                        Post post = Post.builder()
-                                        .id(postId)
-                                        .title("맛있는 게시글")
-                                        .content("내용내용")
-                                        .user(fakeUser)
-                                        .build();
+                        Post post = createPost(postId, "맛있는 게시글", "내용내용", fakeUser);
 
                         given(postRepository.findByIdWithUser(postId)).willReturn(Optional.of(post));
 
@@ -152,19 +166,11 @@ public class PostServiceTest {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
                         Long postId = 100L;
-                        User fakeUser = User.builder().id(userId).build();
+                        User fakeUser = createUser(userId);
 
-                        Post originPost = Post.builder()
-                                        .id(postId)
-                                        .title("원래 제목")
-                                        .content("원래 내용")
-                                        .user(fakeUser)
-                                        .build();
+                        Post originPost = createPost(postId, "원래 제목", "원래 내용", fakeUser);
 
-                        PostEditRequest request = PostEditRequest.builder()
-                                        .title("수정된 제목")
-                                        .content("수정된 내용")
-                                        .build();
+                        PostEditRequest request = createPostEditRequest();
 
                         given(postRepository.findById(postId)).willReturn(Optional.of(originPost));
 
@@ -186,8 +192,8 @@ public class PostServiceTest {
                         // ------------------ [GIVEN] ------------------
                         Long userId = 1L;
                         Long postId = 100L;
-                        User fakeUser = User.builder().id(userId).build();
-                        Post fakePost = Post.builder().id(postId).user(fakeUser).build();
+                        User fakeUser = createUser(userId);
+                        Post fakePost = createPost(postId, null, null, fakeUser);
 
                         Comment fakeComment1 = mock(Comment.class);
                         Comment fakeComment2 = mock(Comment.class);
