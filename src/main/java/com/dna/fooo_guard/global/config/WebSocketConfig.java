@@ -18,24 +18,23 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final WebSocketAuthChannelInterceptor webSocketAuthChannelInterceptor;
 
     @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // 클라이언트가 WebSocket 연결을 시작하는 HTTP handshake endpoint.
-        registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*");
-    }
-
-    @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // 서버가 구독자에게 메시지를 전달할 때 사용하는 in-memory broker prefix.
+        // Subscribe Prefix
         registry.enableSimpleBroker("/sub");
 
-        // 클라이언트가 서버의 @MessageMapping 메서드로 메시지를 보낼 때 사용하는 prefix.
+        // Publish Prefix
         registry.setApplicationDestinationPrefixes("/pub");
     }
 
     @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // 웹소켓 연결 엔드포인트
+        registry.addEndpoint("/ws-stomp")
+                .setAllowedOriginPatterns("*"); // 테스트 편의를 위해 전체 허용
+    }
+
+    @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        // STOMP CONNECT 프레임의 Authorization 헤더를 검증해 WebSocket 세션에 인증 정보를 저장한다.
         registration.interceptors(webSocketAuthChannelInterceptor);
     }
 }

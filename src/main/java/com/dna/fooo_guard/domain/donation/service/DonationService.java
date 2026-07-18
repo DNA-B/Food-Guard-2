@@ -86,11 +86,8 @@ public class DonationService {
 
     // TODO: QueryDSL 속도 비교
     public DonationResponse findDonationById(Long donationId) {
-        // Donation donation = donationRepository.findById(donationId)
-        // .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-
         Donation donation = donationRepository.findByIdWithPostAndFoodAndUser(donationId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DONATION_NOT_FOUND));
         return DonationResponse.from(donation);
     }
 
@@ -133,5 +130,18 @@ public class DonationService {
 
         donationRepository.delete(donation);
         postRepository.delete(post);
+    }
+
+    @Transactional
+    public void completeDonation(Long donationId, Long userId) {
+        Donation donation = donationRepository.findById(donationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.DONATION_NOT_FOUND));
+
+        if (!donation.getPost().getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        donation.updateStatus(DonationStatus.COMPLETED);
+        donation.getFood().updateStatus(FoodStatus.DONATED);
     }
 }
