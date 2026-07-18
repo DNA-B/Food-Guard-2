@@ -7,6 +7,7 @@ import com.dna.fooo_guard.domain.chat.entity.ChatRoom;
 import com.dna.fooo_guard.domain.chat.repository.ChatMessageRepository;
 import com.dna.fooo_guard.domain.chat.repository.ChatRoomRepository;
 import com.dna.fooo_guard.domain.donation.entity.Donation;
+import com.dna.fooo_guard.domain.donation.entity.DonationStatus;
 import com.dna.fooo_guard.domain.donation.repository.DonationRepository;
 import com.dna.fooo_guard.domain.user.entity.User;
 import com.dna.fooo_guard.domain.user.repository.UserRepository;
@@ -43,9 +44,7 @@ public class ChatService {
                         throw new CustomException(ErrorCode.CANNOT_CHAT_WITH_SELF);
                 }
 
-                // ✨ [2번 규칙 보장]: donationId와 guestId 쌍으로 조회하므로,
-                // 새로운 guestId(예: 3번 유저)가 들어오면 기존 1번 방을 타지 않고 반드시 orElseGet으로 새 방을 생성합니다[cite:
-                // 4].
+                // donationId와 guestId 쌍으로 조회하므로 게스트별로 별도 채팅방을 생성합니다.
                 return chatRoomRepository.findByDonationIdAndGuestId(donationId, guestId)
                                 .map(room -> room.getId())
                                 .orElseGet(() -> {
@@ -95,7 +94,9 @@ public class ChatService {
 
         public List<ChatRoomResponseDto> getMyChatRooms(Long userId) {
                 List<ChatRoom> chatRooms = chatRoomRepository.findByHostIdOrGuestId(userId, userId);
+
                 return chatRooms.stream()
+                                .filter(room -> room.getDonation().getStatus() != DonationStatus.COMPLETED)
                                 .map(room -> new ChatRoomResponseDto(room, userId))
                                 .collect(Collectors.toList());
         }
