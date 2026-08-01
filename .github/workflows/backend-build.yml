@@ -3,18 +3,8 @@ name: Java CI with Gradle
 on:
   push:
     branches: ["develop", "main"]
-    paths:
-      - "src/**"
-      - "build.gradle"
-      - "settings.gradle"
-      - "gradle/**"
   pull_request:
     branches: ["develop", "main"]
-    paths:
-      - "src/**"
-      - "build.gradle"
-      - "settings.gradle"
-      - "gradle/**"
 
 jobs:
   build:
