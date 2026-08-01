@@ -177,7 +177,7 @@ docker compose up -d
 애플리케이션을 실행합니다.
 
 ```bash
-./gradlew.bat bootRun
+./gradlew bootRun
 ```
 
 테스트를 실행합니다.
